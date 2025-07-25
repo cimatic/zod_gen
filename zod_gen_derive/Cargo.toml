@@ -1,0 +1,21 @@
+[package]
+name = "zod_gen_derive"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+authors.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "Derive macro for zod_gen - automatically generate Zod schemas from Rust types"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2.workspace = true
+quote.workspace = true
+syn.workspace = true
+zod_gen = { path = "../zod_gen" }

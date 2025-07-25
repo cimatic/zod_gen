@@ -1,0 +1,21 @@
+[package]
+name = "zod_gen_examples"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[[example]]
+name = "basic_usage"
+path = "basic_usage.rs"
+
+[[example]]
+name = "derive_example"
+path = "derive_example.rs"
+
+[[example]]
+name = "generator_example"
+path = "generator_example.rs"
+
+[dependencies]
+zod_gen = { path = "../zod_gen" }
+zod_gen_derive = { path = "../zod_gen_derive" }
