@@ -120,6 +120,7 @@ To enable all workflows, you need to configure these secrets in your GitHub repo
 ### Documentation Deployment Fails
 - Ensure GitHub Pages is enabled in repository settings
 - Check that the workflow has `pages: write` permission
+- If you see "deprecated version" errors, update action versions in workflows
 
 ### Dependency Updates Create Conflicts
 - The workflow will create PRs for dependency updates
