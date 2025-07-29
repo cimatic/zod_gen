@@ -19,7 +19,7 @@ jobs:
       uses: dtolnay/rust-toolchain@stable
     
     - name: Cache dependencies
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           ~/.cargo/registry
@@ -58,7 +58,7 @@ jobs:
       uses: dtolnay/rust-toolchain@stable
     
     - name: Cache dependencies
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           ~/.cargo/registry
@@ -104,12 +104,12 @@ jobs:
         echo "EOF" >> $GITHUB_OUTPUT
     
     - name: Create GitHub Release
-      uses: actions/create-release@v1
+      uses: softprops/action-gh-release@v2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ github.ref }}
-        release_name: Release v${{ steps.version.outputs.VERSION }}
+        name: Release v${{ steps.version.outputs.VERSION }}
         body: ${{ steps.changelog.outputs.CHANGELOG }}
         draft: false
         prerelease: false
