@@ -3,6 +3,8 @@
 [![Crates.io](https://img.shields.io/crates/v/zod_gen.svg)](https://crates.io/crates/zod_gen)
 [![Documentation](https://docs.rs/zod_gen/badge.svg)](https://docs.rs/zod_gen)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![CI](https://github.com/cimatic/zod_gen/workflows/CI/badge.svg)](https://github.com/cimatic/zod_gen/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/cimatic/zod_gen/branch/main/graph/badge.svg)](https://codecov.io/gh/cimatic/zod_gen)
 
 Generate [Zod](https://github.com/colinhacks/zod) schemas and TypeScript types from Rust types with zero runtime overhead and full type safety.
 
