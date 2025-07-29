@@ -346,6 +346,35 @@ fn main() {
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
+### 🔄 CI/CD Pipeline
+
+This project uses GitHub Actions for comprehensive automation:
+
+- **🧪 Continuous Integration**: Tests run on every PR and push
+  - Multi-version Rust testing (stable, beta, nightly)
+  - Code formatting and linting with clippy
+  - Documentation building and security audits
+  - Example validation and code coverage
+
+- **🚀 Automated Releases**: Tag-triggered releases
+  - Automatic publishing to crates.io
+  - GitHub release creation with changelog
+  - Full validation before publishing
+
+- **🔒 Security & Maintenance**: 
+  - Weekly dependency updates via automated PRs
+  - Security vulnerability scanning
+  - Breaking change detection on PRs
+
+- **📚 Documentation**: Auto-deployed to GitHub Pages
+
+### 📋 PR Guidelines
+
+- Follow [Conventional Commits](https://conventionalcommits.org/) format
+- Update `CHANGELOG.md` for non-documentation changes  
+- Ensure all tests pass and examples work
+- Code must be formatted (`cargo fmt`) and pass clippy lints
+
 ### Development Setup
 
 ```bash

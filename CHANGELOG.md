@@ -68,9 +68,43 @@ let typescript = gen.generate();
 
 ---
 
+## [Unreleased]
+
+### 🤖 Added
+- **GitHub Actions CI/CD**: Comprehensive automation for testing, releases, and maintenance
+  - `ci.yml`: Full test suite on multiple Rust versions, formatting, clippy, docs, security audit, coverage
+  - `release.yml`: Automated publishing to crates.io when tags are pushed
+  - `pr.yml`: PR validation with breaking change detection, commit message validation, CHANGELOG checks
+  - `dependencies.yml`: Weekly dependency updates and security audits
+  - `docs.yml`: Automatic documentation deployment to GitHub Pages
+
+### 🔧 Infrastructure
+- **Automated Testing**: Tests run on stable, beta, and nightly Rust
+- **Code Quality**: Automated formatting, clippy lints, and documentation checks
+- **Security**: Weekly security audits with automatic issue creation
+- **Release Automation**: Tag-triggered releases with automatic crates.io publishing
+- **Documentation**: Auto-deployed docs at GitHub Pages
+
+---
+
 ## Release Process
 
-To release a new version:
+### Automated Release (Recommended)
+
+1. **Update Version**: Bump version in `Cargo.toml` workspace
+2. **Update CHANGELOG**: Document all changes in this file  
+3. **Update README**: Update version numbers in installation instructions
+4. **Commit**: `git add . && git commit -m "Release vX.Y.Z"`
+5. **Tag**: `git tag vX.Y.Z`
+6. **Push**: `git push origin main --tags`
+7. **Automated**: GitHub Actions will automatically:
+   - Run full test suite
+   - Publish to crates.io
+   - Create GitHub release with changelog
+
+### Manual Release (Fallback)
+
+To release a new version manually:
 
 1. **Update Version**: Bump version in `Cargo.toml` workspace
 2. **Update CHANGELOG**: Document all changes in this file

@@ -1,0 +1,104 @@
+name: Pull Request
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-pr:
+    name: Validate PR
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        components: rustfmt, clippy
+    
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-pr-${{ hashFiles('**/Cargo.lock') }}
+    
+    - name: Check for breaking changes
+      run: |
+        # Install cargo-semver-checks for API compatibility
+        cargo install cargo-semver-checks
+        
+        # Check for breaking changes (only on non-draft PRs)
+        if [ "${{ github.event.pull_request.draft }}" != "true" ]; then
+          cargo semver-checks check-release
+        fi
+    
+    - name: Validate commit messages
+      run: |
+        # Check that commit messages follow conventional commits
+        git log --format="%s" origin/main..HEAD | while read msg; do
+          if ! echo "$msg" | grep -qE "^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\(.+\))?: .+"; then
+            echo "❌ Invalid commit message: $msg"
+            echo "Please use conventional commits format: type(scope): description"
+            exit 1
+          fi
+        done
+    
+    - name: Check CHANGELOG update
+      run: |
+        # Check if CHANGELOG.md was updated (skip for docs-only changes)
+        if git diff --name-only origin/main..HEAD | grep -qvE "^(README\.md|\.github/|docs/)" && \
+           ! git diff --name-only origin/main..HEAD | grep -q "CHANGELOG.md"; then
+          echo "❌ CHANGELOG.md should be updated for non-documentation changes"
+          echo "Please add an entry to CHANGELOG.md describing your changes"
+          exit 1
+        fi
+    
+    - name: Run full test suite
+      run: cargo test --workspace --verbose
+    
+    - name: Check code formatting
+      run: cargo fmt --all -- --check
+    
+    - name: Run clippy with strict lints
+      run: cargo clippy --workspace --all-targets --all-features -- -D warnings -D clippy::all
+    
+    - name: Validate examples still work
+      run: |
+        cargo run --example basic_usage
+        cargo run --example derive_example
+        cargo run --example generator_example
+    
+    - name: Check documentation builds
+      run: cargo doc --workspace --no-deps --document-private-items
+      env:
+        RUSTDOCFLAGS: -D warnings
+    
+    - name: Validate package can be published
+      run: |
+        cargo publish --dry-run -p zod_gen
+        cargo publish --dry-run -p zod_gen_derive
+
+  size-check:
+    name: Binary Size Check
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+    
+    - name: Build release binaries
+      run: cargo build --release --workspace
+    
+    - name: Check binary sizes
+      run: |
+        echo "📦 Binary sizes:"
+        find target/release -name "*.rlib" -exec ls -lh {} \; | head -10
+        
+        # Warn if any binary is unexpectedly large
+        find target/release -name "*.rlib" -size +10M -exec echo "⚠️  Large binary detected: {}" \;
