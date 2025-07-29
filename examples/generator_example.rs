@@ -1,65 +1,59 @@
-//! ZodGenerator example showing batch TypeScript file generation
-
-use zod_gen::{ZodGenerator, ZodSchema};
+use std::collections::HashMap;
+use zod_gen::ZodGenerator;
 use zod_gen_derive::ZodSchema;
-use std::fs;
 
 #[derive(ZodSchema)]
 struct User {
     id: u64,
     name: String,
     email: String,
+    is_admin: bool,
+    tags: Vec<String>,
+    profile: Option<UserProfile>,
+    metadata: HashMap<String, String>,
 }
 
 #[derive(ZodSchema)]
-struct Post {
-    id: u64,
-    title: String,
-    content: String,
-    author_id: u64,
-    published: bool,
+struct UserProfile {
+    bio: String,
+    avatar_url: Option<String>,
+    social_links: HashMap<String, String>,
 }
 
 #[derive(ZodSchema)]
-enum PostStatus {
-    Draft,
-    Published,
-    Archived,
+enum UserStatus {
+    Active,
+    Inactive,
+    Suspended,
 }
 
 fn main() {
-    println!("=== ZodGenerator Example ===");
-    println!();
+    println!("=== ZodGenerator Example ===\n");
     
     let mut generator = ZodGenerator::new();
     
-    // Add all types to the generator
-    generator.add_schema::<User>();
-    generator.add_schema::<Post>();
-    generator.add_schema::<PostStatus>();
+    // Add various types with meaningful names
+    generator.add_schema::<User>("User");
+    generator.add_schema::<UserProfile>("UserProfile");
+    generator.add_schema::<UserStatus>("UserStatus");
     
-    println!("Registered types:");
-    for type_name in generator.list_types() {
-        println!("  - {}", type_name);
-    }
-    println!();
+    // Add generic types with custom names
+    generator.add_schema::<Vec<User>>("UserList");
+    generator.add_schema::<HashMap<String, User>>("UserMap");
+    generator.add_schema::<Option<UserProfile>>("OptionalProfile");
     
-    // Create output directory
-    fs::create_dir_all("generated_types").unwrap_or_default();
+    // Generate single TypeScript file
+    let content = generator.generate();
     
-    // Generate TypeScript files
-    for type_name in generator.list_types() {
-        if let Some(content) = generator.generate_file(type_name) {
-            let filename = format!("generated_types/{}.ts", type_name);
-            fs::write(&filename, content).unwrap();
-            println!("Generated: {}", filename);
-        }
-    }
+    println!("Generated TypeScript file:");
+    println!("{}", content);
     
-    println!();
-    println!("Example generated file content:");
-    println!("================================");
-    if let Some(content) = generator.generate_file("User") {
-        println!("{}", content);
-    }
+    println!("=== Key Features Demonstrated ===");
+    println!("✅ Structs with various field types (User, UserProfile)");
+    println!("✅ Enums with unit variants (UserStatus)");
+    println!("✅ Generic types: Vec<T>, HashMap<String, T>, Option<T>");
+    println!("✅ Nested objects with inline schemas");
+    println!("✅ User-controlled naming for TypeScript exports");
+    println!("✅ Single file output with all schemas");
+    println!("✅ TypeScript types inferred automatically with z.infer<>");
 }

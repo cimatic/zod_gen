@@ -1,6 +1,6 @@
 //! Basic usage example showing manual ZodSchema implementation
 
-use zod_gen::{ZodSchema, zod_object, zod_string, zod_number, zod_boolean};
+use zod_gen::{zod_boolean, zod_number, zod_object, zod_string, ZodSchema};
 
 struct User {
     id: u64,
@@ -9,10 +9,6 @@ struct User {
 }
 
 impl ZodSchema for User {
-    fn type_name() -> String {
-        "User".to_string()
-    }
-
     fn zod_schema() -> String {
         zod_object(&[
             ("id", zod_number()),
@@ -25,14 +21,11 @@ impl ZodSchema for User {
 fn main() {
     println!("=== Basic Usage Example ===");
     println!();
-    
-    println!("Type name: {}", User::type_name());
-    println!();
-    
+
     println!("Zod schema:");
     println!("{}", User::zod_schema());
     println!();
-    
+
     println!("This would generate the following TypeScript:");
     println!("export const UserSchema = {};", User::zod_schema());
     println!("export type User = z.infer<typeof UserSchema>;");

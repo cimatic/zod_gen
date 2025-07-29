@@ -13,3 +13,4 @@ description = "Generate Zod schemas and TypeScript types from Rust types"
 
 [dependencies]
 serde.workspace = true
+serde_json.workspace = true

@@ -22,8 +22,8 @@ Add both crates to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-zod_gen = "0.1"
-zod_gen_derive = "0.1"
+zod_gen = "1.0"
+zod_gen_derive = "1.0"
 ```
 
 ## 🔧 Quick Start
@@ -83,10 +83,6 @@ struct User {
 }
 
 impl ZodSchema for User {
-    fn type_name() -> String {
-        "User".to_string()
-    }
-
     fn zod_schema() -> String {
         zod_object(&[
             ("id", zod_number()),
@@ -97,7 +93,7 @@ impl ZodSchema for User {
 }
 ```
 
-### Batch generation with ZodGenerator
+### Single file generation with ZodGenerator
 
 ```rust
 use zod_gen::ZodGenerator;
@@ -105,26 +101,24 @@ use std::fs;
 
 fn generate_types() {
     let mut generator = ZodGenerator::new();
-    
-    // Add all your types
-    generator.add_schema::<User>();
-    generator.add_schema::<UserProfile>();
-    generator.add_schema::<UserStatus>();
-    
-    // Generate TypeScript files
-    for type_name in generator.list_types() {
-        let content = generator.generate_file(type_name).unwrap();
-        fs::write(format!("types/{}.ts", type_name), content).unwrap();
-    }
+
+    // Add all your types with meaningful names
+    generator.add_schema::<User>("User");
+    generator.add_schema::<UserProfile>("UserProfile");
+    generator.add_schema::<UserStatus>("UserStatus");
+
+    // Generate a single TypeScript file with all schemas
+    let content = generator.generate();
+    fs::write("types/schemas.ts", content).unwrap();
 }
 ```
 
 ## 📚 Generated TypeScript
 
-The generated TypeScript provides both Zod schemas and inferred types:
+The generated TypeScript provides both Zod schemas and inferred types in a single file:
 
 ```typescript
-// Generated User.ts
+// Generated schemas.ts
 import { z } from 'zod';
 
 export const UserSchema = z.object({
@@ -138,14 +132,22 @@ export const UserSchema = z.object({
     avatar_url: z.string().optional()
   }).optional()
 });
-
 export type User = z.infer<typeof UserSchema>;
+
+export const UserProfileSchema = z.object({
+  bio: z.string(),
+  avatar_url: z.string().optional()
+});
+export type UserProfile = z.infer<typeof UserProfileSchema>;
+
+export const UserStatusSchema = z.union([z.literal('Active'), z.literal('Inactive'), z.literal('Suspended')]);
+export type UserStatus = z.infer<typeof UserStatusSchema>;
 ```
 
 Use it in your TypeScript code:
 
 ```typescript
-import { UserSchema, type User } from './types/User';
+import { UserSchema, type User } from './types/schemas';
 
 // Runtime validation
 const validateUser = (data: unknown): User => {
@@ -183,13 +185,14 @@ This repository contains two crates:
 ## 🎯 Supported Types
 
 ### Primitives
-- `String`, `&str` → `z.string()`
-- `i32`, `i64`, `u32`, `u64`, `f32`, `f64` → `z.number()`
-- `bool` → `z.boolean()`
+- `String`, `&str` → `z.string()` (TypeScript: `string`)
+- `i32`, `i64`, `u32`, `u64`, `f32`, `f64` → `z.number()` (TypeScript: `number`)
+- `bool` → `z.boolean()` (TypeScript: `boolean`)
 
 ### Generics
-- `Option<T>` → `T.optional()`
-- `Vec<T>` → `z.array(T)`
+- `Option<T>` → `T.optional()` (TypeScript: `Optional<T>`)
+- `Vec<T>` → `z.array(T)` (TypeScript: `Array<T>`)
+- `HashMap<String, T>` → `z.record(z.string(), T)` (TypeScript: `Record<string, T>`)
 - Custom collections via manual implementation
 
 ### Structs
@@ -201,6 +204,114 @@ This repository contains two crates:
 
 ## 🔧 Advanced Usage
 
+### Schema Generation Strategy
+
+By default, `zod_gen` generates **inline schemas** for nested objects. This means that complex types are expanded directly into their Zod representation:
+
+```rust
+#[derive(ZodSchema)]
+struct User {
+    id: u64,
+    name: String,
+    profile: Option<UserProfile>,
+}
+
+#[derive(ZodSchema)]
+struct UserProfile {
+    bio: String,
+    avatar_url: Option<String>,
+}
+
+// Generates inline schema:
+// z.object({
+//   id: z.number(),
+//   name: z.string(),
+//   profile: z.object({
+//     bio: z.string(),
+//     avatar_url: z.string().nullable()
+//   }).nullable()
+// })
+```
+
+This approach works consistently across all generic types:
+
+```rust
+use std::collections::HashMap;
+
+// HashMap<String, User> generates:
+// z.record(z.string(), z.object({
+//   id: z.number(),
+//   name: z.string(),
+//   profile: z.object({
+//     bio: z.string(),
+//     avatar_url: z.string().nullable()
+//   }).nullable()
+// }))
+```
+
+**Benefits of inline schemas:**
+- ✅ Self-contained - no external dependencies
+- ✅ Works with any nesting level
+- ✅ Consistent behavior across all types
+- ✅ No need to manage schema imports
+
+**Considerations:**
+- Schema duplication if the same type is used in multiple places
+- Larger generated schemas for deeply nested structures
+
+### User-Controlled Naming
+
+You provide the TypeScript type names when adding schemas to the generator:
+
+```rust
+let mut gen = ZodGenerator::new();
+
+// Use meaningful names for your TypeScript types
+gen.add_schema::<HashMap<String, User>>("UserMap");
+gen.add_schema::<Vec<User>>("UserList");
+gen.add_schema::<Option<UserProfile>>("OptionalProfile");
+```
+
+This generates clean TypeScript with your chosen names:
+
+```typescript
+export const UserMapSchema = z.record(z.string(), UserSchema);
+export type UserMap = z.infer<typeof UserMapSchema>;
+
+export const UserListSchema = z.array(UserSchema);
+export type UserList = z.infer<typeof UserListSchema>;
+```
+
+**Benefits:**
+- **Full control** over TypeScript type names
+- **Meaningful names** instead of auto-generated ones
+- **No magic** - you decide what gets exported
+- **TypeScript types are inferred** from Zod schemas using `z.infer<>`
+
+### Single File Output
+
+The `ZodGenerator` creates a single TypeScript file containing all your schemas. This approach:
+
+- **Simplifies file management** - No need to track multiple files
+- **Reduces complexity** - One file, one import
+- **Improves maintainability** - All schemas in one place
+- **Enables tree-shaking** - Import only what you need
+
+If you need multiple files, simply create multiple generators:
+
+```rust
+// Generate API types
+let mut api_gen = ZodGenerator::new();
+api_gen.add_schema::<User>("User");
+api_gen.add_schema::<Post>("Post");
+std::fs::write("types/api.ts", api_gen.generate()).unwrap();
+
+// Generate config types
+let mut config_gen = ZodGenerator::new();
+config_gen.add_schema::<AppConfig>("AppConfig");
+std::fs::write("types/config.ts", config_gen.generate()).unwrap();
+```
+
 ### Custom Schema Implementation
 
 ```rust
@@ -208,10 +319,6 @@ use zod_gen::ZodSchema;
 use chrono::{DateTime, Utc};
 
 impl ZodSchema for DateTime<Utc> {
-    fn type_name() -> String {
-        "DateTime".to_string()
-    }
-    
     fn zod_schema() -> String {
         "z.string().datetime()".to_string()
     }
@@ -227,11 +334,11 @@ use zod_gen::ZodGenerator;
 
 fn main() {
     let mut generator = ZodGenerator::new();
-    generator.add_schema::<MyType>();
-    
+    generator.add_schema::<MyType>("MyType");
+
     // Generate during build
-    let content = generator.generate_file("MyType").unwrap();
-    std::fs::write("frontend/types/MyType.ts", content).unwrap();
+    let content = generator.generate();
+    std::fs::write("frontend/types/schemas.ts", content).unwrap();
 }
 ```
 
@@ -250,8 +357,13 @@ cargo test
 ### Running Examples
 
 ```bash
+# Manual ZodSchema implementation
 cargo run --example basic_usage
+
+# Using the derive macro for automatic schema generation
 cargo run --example derive_example
+
+# Using ZodGenerator for multiple schemas with custom naming
 cargo run --example generator_example
 ```
 

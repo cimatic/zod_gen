@@ -9,7 +9,6 @@ use syn::{parse_macro_input, DeriveInput, Data, Fields, LitStr};
 pub fn derive_zod_schema(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     let name = &input.ident;
-    let type_name = LitStr::new(&name.to_string(), name.span());
 
     let expanded = match input.data {
         Data::Struct(data_struct) => match data_struct.fields {
@@ -22,10 +21,6 @@ pub fn derive_zod_schema(input: TokenStream) -> TokenStream {
                 });
                 quote! {
                     impl zod_gen::ZodSchema for #name {
-                        fn type_name() -> String {
-                            #type_name.to_string()
-                        }
-
                         fn zod_schema() -> String {
                             zod_gen::zod_object(&[#(#fields),*])
                         }
@@ -41,10 +36,6 @@ pub fn derive_zod_schema(input: TokenStream) -> TokenStream {
             });
             quote! {
                 impl zod_gen::ZodSchema for #name {
-                    fn type_name() -> String {
-                        #type_name.to_string()
-                    }
-
                     fn zod_schema() -> String {
                         zod_gen::zod_enum(&[#(#variants),*])
                     }
