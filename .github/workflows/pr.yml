@@ -12,12 +12,12 @@ jobs:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
-    
+
     - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
       with:
         components: rustfmt, clippy
-    
+
     - name: Cache dependencies
       uses: actions/cache@v4
       with:
@@ -25,8 +25,8 @@ jobs:
           ~/.cargo/registry
           ~/.cargo/git
           target
-         key: ${{ runner.os }}-cargo-pr-${{ hashFiles('**/Cargo.lock') }}
-    
+        key: ${{ runner.os }}-cargo-pr-${{ hashFiles('**/Cargo.lock') }}
+
     - name: Cache cargo tools
       uses: actions/cache@v4
       with:
@@ -34,7 +34,7 @@ jobs:
         key: ${{ runner.os }}-cargo-tools-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: |
           ${{ runner.os }}-cargo-tools-
-    
+
     - name: Cache rust-script projects
       uses: actions/cache@v4
       with:
@@ -42,34 +42,34 @@ jobs:
         key: ${{ runner.os }}-rust-script-${{ hashFiles('.github/scripts/*.rs') }}
         restore-keys: |
           ${{ runner.os }}-rust-script-
-    
+
     - name: Install rust-script
       run: command -v rust-script >/dev/null 2>&1 || cargo install rust-script
-    
+
     - name: Run PR validation checks
       run: rust-script .github/scripts/pr_validation.rs
       env:
-        GITHUB_EVENT_PULL_REQUEST_DRAFT: ${{ github.event.pull_request.draft }}    
+        GITHUB_EVENT_PULL_REQUEST_DRAFT: ${{ github.event.pull_request.draft }}
     - name: Run full test suite
       run: cargo test --workspace --verbose
-    
+
     - name: Check code formatting
       run: cargo fmt --all -- --check
-    
+
     - name: Run clippy with strict lints
       run: cargo clippy --workspace --all-targets --all-features -- -D warnings -D clippy::all
-    
+
     - name: Validate examples still work
       run: |
         cargo run --example basic_usage
         cargo run --example derive_example
         cargo run --example generator_example
-    
+
     - name: Check documentation builds
       run: cargo doc --workspace --no-deps --document-private-items
       env:
         RUSTDOCFLAGS: -D warnings
-    
+
     - name: Validate package can be published
       run: |
         cargo publish --dry-run -p zod_gen
@@ -80,10 +80,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
-    
+
     - name: Cache cargo tools
       uses: actions/cache@v4
       with:
@@ -91,7 +91,7 @@ jobs:
         key: ${{ runner.os }}-cargo-tools-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: |
           ${{ runner.os }}-cargo-tools-
-    
+
     - name: Cache rust-script projects
       uses: actions/cache@v4
       with:
@@ -99,12 +99,12 @@ jobs:
         key: ${{ runner.os }}-rust-script-${{ hashFiles('.github/scripts/*.rs') }}
         restore-keys: |
           ${{ runner.os }}-rust-script-
-    
+
     - name: Install rust-script
       run: command -v rust-script >/dev/null 2>&1 || cargo install rust-script
-    
+
     - name: Build release binaries
       run: cargo build --release --workspace
-    
+
     - name: Check binary sizes
       run: rust-script .github/scripts/check_binary_sizes.rs

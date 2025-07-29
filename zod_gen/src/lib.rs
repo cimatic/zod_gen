@@ -25,27 +25,24 @@ pub fn zod_boolean() -> &'static str {
 }
 
 pub fn zod_nullable(inner: &str) -> String {
-    format!("{}.nullable()", inner)
+    format!("{inner}.nullable()")
 }
 pub fn zod_array(inner: &str) -> String {
-    format!("z.array({})", inner)
+    format!("z.array({inner})")
 }
 pub fn zod_record(value: &str) -> String {
-    format!("z.record(z.string(), {})", value)
+    format!("z.record(z.string(), {value})")
 }
 
 pub fn zod_object(fields: &[(&str, &str)]) -> String {
-    let items: Vec<String> = fields
-        .iter()
-        .map(|(k, v)| format!("  {}: {}", k, v))
-        .collect();
+    let items: Vec<String> = fields.iter().map(|(k, v)| format!("  {k}: {v}")).collect();
     format!("z.object({{\n{}\n}})", items.join(",\n"))
 }
 
 pub fn zod_enum(variants: &[&str]) -> String {
     let lits: Vec<String> = variants
         .iter()
-        .map(|v| format!("z.literal('{}')", v))
+        .map(|v| format!("z.literal('{v}')"))
         .collect();
     format!("z.union([{}])", lits.join(", "))
 }
@@ -79,8 +76,7 @@ impl ZodGenerator {
 
         for (name, schema) in &self.schemas {
             output.push_str(&format!(
-                "export const {}Schema = {};\nexport type {} = z.infer<typeof {}Schema>;\n\n",
-                name, schema, name, name
+                "export const {name}Schema = {schema};\nexport type {name} = z.infer<typeof {name}Schema>;\n\n"
             ));
         }
 
