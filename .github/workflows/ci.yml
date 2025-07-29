@@ -113,8 +113,28 @@ jobs:
     - uses: dtolnay/rust-toolchain@stable
       with:
         components: llvm-tools-preview
-    - name: Install cargo-llvm-cov
-      uses: taiki-e/install-action@cargo-llvm-cov
+    - name: Cache cargo tools
+      uses: actions/cache@v4
+      with:
+        path: ~/.cargo/bin
+        key: ${{ runner.os }}-cargo-tools-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-tools-
+    
+    - name: Cache rust-script projects
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/rust-script/projects
+        key: ${{ runner.os }}-rust-script-${{ hashFiles('.github/scripts/*.rs') }}
+        restore-keys: |
+          ${{ runner.os }}-rust-script-
+    
+    - name: Install cargo-llvm-cov and rust-script
+      run: |
+        # Only install if not cached
+        command -v cargo-llvm-cov >/dev/null 2>&1 || cargo install cargo-llvm-cov
+        command -v rust-script >/dev/null 2>&1 || cargo install rust-script
+    
     - name: Cache dependencies
       uses: actions/cache@v4
       with:
@@ -123,10 +143,6 @@ jobs:
           ~/.cargo/git
           target
         key: ${{ runner.os }}-cargo-coverage-${{ hashFiles('**/Cargo.lock') }}
-    - name: Generate code coverage
-      run: cargo llvm-cov --workspace --lcov --output-path lcov.info
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        files: lcov.info
-        fail_ci_if_error: true
+    
+    - name: Generate coverage with annotations
+      run: rust-script .github/scripts/coverage_annotations.rs

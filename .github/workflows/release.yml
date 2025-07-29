@@ -94,14 +94,28 @@ jobs:
       id: version
       run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
     
+    - name: Cache cargo tools
+      uses: actions/cache@v4
+      with:
+        path: ~/.cargo/bin
+        key: ${{ runner.os }}-cargo-tools-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-tools-
+    
+    - name: Cache rust-script projects
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/rust-script/projects
+        key: ${{ runner.os }}-rust-script-${{ hashFiles('.github/scripts/*.rs') }}
+        restore-keys: |
+          ${{ runner.os }}-rust-script-
+    
+    - name: Install rust-script
+      run: command -v rust-script >/dev/null 2>&1 || cargo install rust-script
+    
     - name: Extract changelog
       id: changelog
-      run: |
-        # Extract changelog section for this version
-        awk '/^## \[${{ steps.version.outputs.VERSION }}\]/{flag=1; next} /^## \[/{flag=0} flag' CHANGELOG.md > release_notes.md
-        echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
-        cat release_notes.md >> $GITHUB_OUTPUT
-        echo "EOF" >> $GITHUB_OUTPUT
+      run: rust-script .github/scripts/extract_changelog.rs ${{ steps.version.outputs.VERSION }}
     
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2

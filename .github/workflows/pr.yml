@@ -25,39 +25,31 @@ jobs:
           ~/.cargo/registry
           ~/.cargo/git
           target
-        key: ${{ runner.os }}-cargo-pr-${{ hashFiles('**/Cargo.lock') }}
+         key: ${{ runner.os }}-cargo-pr-${{ hashFiles('**/Cargo.lock') }}
     
-    - name: Check for breaking changes
-      run: |
-        # Install cargo-semver-checks for API compatibility
-        cargo install cargo-semver-checks
-        
-        # Check for breaking changes (only on non-draft PRs)
-        if [ "${{ github.event.pull_request.draft }}" != "true" ]; then
-          cargo semver-checks check-release
-        fi
+    - name: Cache cargo tools
+      uses: actions/cache@v4
+      with:
+        path: ~/.cargo/bin
+        key: ${{ runner.os }}-cargo-tools-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-tools-
     
-    - name: Validate commit messages
-      run: |
-        # Check that commit messages follow conventional commits
-        git log --format="%s" origin/main..HEAD | while read msg; do
-          if ! echo "$msg" | grep -qE "^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\(.+\))?: .+"; then
-            echo "❌ Invalid commit message: $msg"
-            echo "Please use conventional commits format: type(scope): description"
-            exit 1
-          fi
-        done
+    - name: Cache rust-script projects
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/rust-script/projects
+        key: ${{ runner.os }}-rust-script-${{ hashFiles('.github/scripts/*.rs') }}
+        restore-keys: |
+          ${{ runner.os }}-rust-script-
     
-    - name: Check CHANGELOG update
-      run: |
-        # Check if CHANGELOG.md was updated (skip for docs-only changes)
-        if git diff --name-only origin/main..HEAD | grep -qvE "^(README\.md|\.github/|docs/)" && \
-           ! git diff --name-only origin/main..HEAD | grep -q "CHANGELOG.md"; then
-          echo "❌ CHANGELOG.md should be updated for non-documentation changes"
-          echo "Please add an entry to CHANGELOG.md describing your changes"
-          exit 1
-        fi
+    - name: Install rust-script
+      run: command -v rust-script >/dev/null 2>&1 || cargo install rust-script
     
+    - name: Run PR validation checks
+      run: rust-script .github/scripts/pr_validation.rs
+      env:
+        GITHUB_EVENT_PULL_REQUEST_DRAFT: ${{ github.event.pull_request.draft }}    
     - name: Run full test suite
       run: cargo test --workspace --verbose
     
@@ -92,13 +84,27 @@ jobs:
     - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
     
+    - name: Cache cargo tools
+      uses: actions/cache@v4
+      with:
+        path: ~/.cargo/bin
+        key: ${{ runner.os }}-cargo-tools-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-tools-
+    
+    - name: Cache rust-script projects
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/rust-script/projects
+        key: ${{ runner.os }}-rust-script-${{ hashFiles('.github/scripts/*.rs') }}
+        restore-keys: |
+          ${{ runner.os }}-rust-script-
+    
+    - name: Install rust-script
+      run: command -v rust-script >/dev/null 2>&1 || cargo install rust-script
+    
     - name: Build release binaries
       run: cargo build --release --workspace
     
     - name: Check binary sizes
-      run: |
-        echo "📦 Binary sizes:"
-        find target/release -name "*.rlib" -exec ls -lh {} \; | head -10
-        
-        # Warn if any binary is unexpectedly large
-        find target/release -name "*.rlib" -size +10M -exec echo "⚠️  Large binary detected: {}" \;
+      run: rust-script .github/scripts/check_binary_sizes.rs
