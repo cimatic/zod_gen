@@ -2,7 +2,7 @@ extern crate proc_macro;
 
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{parse_macro_input, DeriveInput, Data, Fields, LitStr};
+use syn::{parse_macro_input, Data, DeriveInput, Fields, LitStr};
 
 /// Derive macro for ZodSchema
 #[proc_macro_derive(ZodSchema)]

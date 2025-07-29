@@ -1,13 +1,15 @@
-use zod_gen_derive::ZodSchema;
 use zod_gen::ZodSchema as _;
+use zod_gen_derive::ZodSchema;
 
 #[derive(ZodSchema)]
+#[allow(dead_code)]
 struct TestStruct {
     a: String,
     b: i32,
 }
 
 #[derive(ZodSchema)]
+#[allow(dead_code)]
 enum TestEnum {
     Foo,
     Bar,

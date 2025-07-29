@@ -3,6 +3,7 @@ use zod_gen::ZodGenerator;
 use zod_gen_derive::ZodSchema;
 
 #[derive(ZodSchema)]
+#[allow(dead_code)]
 struct User {
     id: u64,
     name: String,
@@ -14,6 +15,7 @@ struct User {
 }
 
 #[derive(ZodSchema)]
+#[allow(dead_code)]
 struct UserProfile {
     bio: String,
     avatar_url: Option<String>,
@@ -21,6 +23,7 @@ struct UserProfile {
 }
 
 #[derive(ZodSchema)]
+#[allow(dead_code)]
 enum UserStatus {
     Active,
     Inactive,
@@ -29,25 +32,25 @@ enum UserStatus {
 
 fn main() {
     println!("=== ZodGenerator Example ===\n");
-    
+
     let mut generator = ZodGenerator::new();
-    
+
     // Add various types with meaningful names
     generator.add_schema::<User>("User");
     generator.add_schema::<UserProfile>("UserProfile");
     generator.add_schema::<UserStatus>("UserStatus");
-    
+
     // Add generic types with custom names
     generator.add_schema::<Vec<User>>("UserList");
     generator.add_schema::<HashMap<String, User>>("UserMap");
     generator.add_schema::<Option<UserProfile>>("OptionalProfile");
-    
+
     // Generate single TypeScript file
     let content = generator.generate();
-    
+
     println!("Generated TypeScript file:");
     println!("{}", content);
-    
+
     println!("=== Key Features Demonstrated ===");
     println!("✅ Structs with various field types (User, UserProfile)");
     println!("✅ Enums with unit variants (UserStatus)");

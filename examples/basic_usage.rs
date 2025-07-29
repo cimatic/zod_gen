@@ -2,6 +2,7 @@
 
 use zod_gen::{zod_boolean, zod_number, zod_object, zod_string, ZodSchema};
 
+#[allow(dead_code)]
 struct User {
     id: u64,
     name: String,
