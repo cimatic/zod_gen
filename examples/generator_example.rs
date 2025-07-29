@@ -49,7 +49,7 @@ fn main() {
     let content = generator.generate();
 
     println!("Generated TypeScript file:");
-    println!("{}", content);
+    println!("{content}");
 
     println!("=== Key Features Demonstrated ===");
     println!("✅ Structs with various field types (User, UserProfile)");
