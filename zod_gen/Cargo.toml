@@ -9,7 +9,7 @@ documentation.workspace = true
 authors.workspace = true
 keywords.workspace = true
 categories.workspace = true
-description = "Generate Zod schemas and TypeScript types from Rust types with serde rename support"
+description = "Generate Zod schemas and TypeScript types from Rust types. Use with zod_gen_derive for automatic #[derive(ZodSchema)] support and serde rename compatibility."
 
 [dependencies]
 serde.workspace = true
