@@ -18,4 +18,4 @@ proc-macro = true
 proc-macro2.workspace = true
 quote.workspace = true
 syn.workspace = true
-zod_gen = { version = "1.0.0", path = "../zod_gen" }
+zod_gen = { version = "1.1.1", path = "../zod_gen" }
