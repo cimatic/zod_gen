@@ -44,6 +44,7 @@ jobs:
         cargo run --example basic_usage
         cargo run --example derive_example
         cargo run --example generator_example
+        cargo run --example serde_rename_test
     
     - name: Dry run publish
       run: |
