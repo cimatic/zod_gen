@@ -12,6 +12,7 @@ Generate [Zod](https://github.com/colinhacks/zod) schemas and TypeScript types f
 
 - **Zero-cost abstractions** - No runtime overhead, pure compile-time code generation
 - **Full type safety** - End-to-end type safety from Rust to TypeScript
+- **Serde rename support** - Automatic handling of `#[serde(rename = "...")]` attributes
 - **Derive macro support** - `#[derive(ZodSchema)]` for automatic schema generation
 - **Primitive type support** - Built-in support for all common Rust types
 - **Generic types** - Automatic handling of `Option<T>`, `Vec<T>`, and more
@@ -24,8 +25,8 @@ Add both crates to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-zod_gen = "1.0"
-zod_gen_derive = "1.0"
+zod_gen = "1.1"
+zod_gen_derive = "1.1"
 ```
 
 ## 🔧 Quick Start
@@ -54,8 +55,11 @@ struct UserProfile {
 
 #[derive(ZodSchema)]
 enum UserStatus {
+    #[serde(rename = "active")]
     Active,
+    #[serde(rename = "inactive")]
     Inactive,
+    #[serde(rename = "suspended")]
     Suspended,
 }
 
@@ -142,7 +146,7 @@ export const UserProfileSchema = z.object({
 });
 export type UserProfile = z.infer<typeof UserProfileSchema>;
 
-export const UserStatusSchema = z.union([z.literal('Active'), z.literal('Inactive'), z.literal('Suspended')]);
+export const UserStatusSchema = z.union([z.literal('active'), z.literal('inactive'), z.literal('suspended')]);
 export type UserStatus = z.infer<typeof UserStatusSchema>;
 ```
 
@@ -203,6 +207,58 @@ This repository contains two crates:
 
 ### Enums
 - Unit variants → `z.union([z.literal('A'), z.literal('B')])`
+- Serde rename support → `#[serde(rename = "custom_name")]` → `z.literal('custom_name')`
+
+## 🎯 Serde Rename Support
+
+`zod_gen` automatically handles `#[serde(rename = "...")]` attributes, ensuring your TypeScript types match your serialized JSON exactly:
+
+```rust
+use serde::{Serialize, Deserialize};
+use zod_gen_derive::ZodSchema;
+
+#[derive(ZodSchema, Serialize, Deserialize)]
+enum ApiStatus {
+    #[serde(rename = "success")]
+    Success,
+    #[serde(rename = "error")]
+    Error,
+    #[serde(rename = "pending")]
+    Pending,
+}
+
+#[derive(ZodSchema, Serialize, Deserialize)]
+enum UserRole {
+    #[serde(rename = "admin")]
+    Administrator,
+    #[serde(rename = "user")]
+    RegularUser,
+    #[serde(rename = "guest")]
+    GuestUser,
+}
+```
+
+**Generated TypeScript:**
+```typescript
+export const ApiStatusSchema = z.union([z.literal('success'), z.literal('error'), z.literal('pending')]);
+export type ApiStatus = z.infer<typeof ApiStatusSchema>;
+
+export const UserRoleSchema = z.union([z.literal('admin'), z.literal('user'), z.literal('guest')]);
+export type UserRole = z.infer<typeof UserRoleSchema>;
+```
+
+**Type Safety Benefits:**
+```typescript
+// ✅ TypeScript accepts the serde-renamed values
+const status: ApiStatus = 'success';
+const role: UserRole = 'admin';
+
+// ❌ TypeScript catches typos with the Rust variant names
+const badStatus: ApiStatus = 'Success'; // Error: Type '"Success"' is not assignable to type 'ApiStatus'
+const badRole: UserRole = 'Administrator'; // Error: Type '"Administrator"' is not assignable to type 'UserRole'
+```
+
+This ensures perfect alignment between your Rust API and TypeScript frontend, catching serialization mismatches at compile time.
 
 ## 🔧 Advanced Usage
 

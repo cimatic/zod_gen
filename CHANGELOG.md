@@ -68,6 +68,41 @@ let typescript = gen.generate();
 
 ---
 
+## [1.1.0] - 2025-07-30
+
+### ✨ Added
+
+- **Serde Rename Support**: Automatic handling of `#[serde(rename = "...")]` attributes on enum variants
+  - Enum variants with serde rename generate TypeScript literal types using the renamed values
+  - Ensures perfect alignment between Rust serialization and TypeScript types
+  - Provides compile-time type safety to catch serialization mismatches
+
+### 🎯 Type Safety Improvements
+
+- TypeScript now catches typos when using enum values (e.g., `'Active'` vs `'active'`)
+- Generated schemas use serde-renamed values for runtime validation
+- Maintains backward compatibility for enums without serde rename
+
+### 📚 Examples
+
+```rust
+#[derive(ZodSchema, Serialize, Deserialize)]
+enum Status {
+    #[serde(rename = "active")]
+    Active,
+    #[serde(rename = "inactive")]
+    Inactive,
+}
+```
+
+Generates:
+```typescript
+export const StatusSchema = z.union([z.literal('active'), z.literal('inactive')]);
+export type Status = z.infer<typeof StatusSchema>;
+```
+
+---
+
 ## [Unreleased]
 
 ### 🤖 Added
@@ -92,7 +127,7 @@ let typescript = gen.generate();
 ### Automated Release (Recommended)
 
 1. **Update Version**: Bump version in `Cargo.toml` workspace
-2. **Update CHANGELOG**: Document all changes in this file  
+2. **Update CHANGELOG**: Document all changes in this file
 3. **Update README**: Update version numbers in installation instructions
 4. **Commit**: `git add . && git commit -m "Release vX.Y.Z"`
 5. **Tag**: `git tag vX.Y.Z`
@@ -121,4 +156,5 @@ To release a new version manually:
 - **Minor (X.Y.0)**: New features, backward compatible
 - **Patch (X.Y.Z)**: Bug fixes, backward compatible
 
+[1.1.0]: https://github.com/cimatic/zod_gen/releases/tag/v1.1.0
 [1.0.0]: https://github.com/cimatic/zod_gen/releases/tag/v1.0.0

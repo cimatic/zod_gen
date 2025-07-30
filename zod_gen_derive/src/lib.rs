@@ -4,6 +4,32 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, Data, DeriveInput, Fields, LitStr};
 
+/// Helper function to extract the serde rename value from variant attributes
+/// 
+/// Returns the renamed value if #[serde(rename = "...")] is found,
+/// otherwise returns the variant name as a string.
+fn extract_serde_rename(variant: &syn::Variant) -> String {
+    for attr in &variant.attrs {
+        if attr.path().is_ident("serde") {
+            // Convert the attribute to a string and parse it manually
+            let attr_str = quote!(#attr).to_string();
+            
+            // Look for rename pattern in the attribute string
+            if let Some(rename_start) = attr_str.find("rename") {
+                let rename_part = &attr_str[rename_start..];
+                if let Some(quote_start) = rename_part.find('"') {
+                    if let Some(quote_end) = rename_part[quote_start + 1..].find('"') {
+                        let rename_value = &rename_part[quote_start + 1..quote_start + 1 + quote_end];
+                        return rename_value.to_string();
+                    }
+                }
+            }
+        }
+    }
+    // Fallback to variant name if no serde rename found
+    variant.ident.to_string()
+}
+
 /// Derive macro for ZodSchema
 #[proc_macro_derive(ZodSchema)]
 pub fn derive_zod_schema(input: TokenStream) -> TokenStream {
@@ -31,7 +57,8 @@ pub fn derive_zod_schema(input: TokenStream) -> TokenStream {
         },
         Data::Enum(data_enum) => {
             let variants = data_enum.variants.iter().map(|v| {
-                let var_name = LitStr::new(&v.ident.to_string(), v.ident.span());
+                let renamed_value = extract_serde_rename(v);
+                let var_name = LitStr::new(&renamed_value, v.ident.span());
                 quote! { #var_name }
             });
             quote! {
@@ -47,3 +74,5 @@ pub fn derive_zod_schema(input: TokenStream) -> TokenStream {
 
     TokenStream::from(expanded)
 }
+
+
