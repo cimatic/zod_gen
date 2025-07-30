@@ -48,7 +48,6 @@ fn main() {
     println!("🔧 Serde Rename Support Test\n");
 
     let mut generator = ZodGenerator::new();
-    let _unused_var = 42; // This will trigger clippy warning
     generator.add_schema::<User>("User");
     generator.add_schema::<UserStatus>("UserStatus");
     generator.add_schema::<Priority>("Priority");
