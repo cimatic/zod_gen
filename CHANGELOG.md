@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.4] - 2025-07-30
+
+### 📚 Documentation Improvements
+
+#### Enhanced
+- **Comprehensive Crate Documentation**: Added detailed module documentation prominently featuring the derive macro
+- **TypeScript Output Examples**: Show exactly what gets generated from Rust types
+- **Installation Guide**: Clear instructions for using both `zod_gen` and `zod_gen_derive` together
+- **Usage Examples**: Both derive macro (recommended) and manual implementation approaches
+- **Crates.io Description**: Updated to mention `zod_gen_derive` for better discoverability
+
+This release makes it much clearer to new users that `zod_gen_derive` is the recommended way to use the library, addressing feedback about the crates.io page.
+
 ## [1.1.3] - 2025-07-30
 
 ### 🔧 Development Experience Improvements
