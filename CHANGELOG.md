@@ -5,6 +5,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2025-07-30
+
+### 🔧 Development Experience Improvements
+
+This release focuses on improving the development experience and ensuring consistency between local development and CI environments.
+
+#### Added
+- **Native Git Pre-commit Hook**: Automatically runs rustfmt, clippy, tests, and example verification before each commit
+- **Rust Toolchain Pinning**: Added `rust-toolchain.toml` to ensure consistent Rust version across environments
+- **CI Consistency Scripts**: 
+  - `scripts/clippy-ci.sh` - Run clippy with exact CI flags locally
+  - `scripts/debug-clippy.sh` - Troubleshoot clippy differences between local and CI
+- **Development Documentation**: Comprehensive `DEVELOPMENT.md` with setup and troubleshooting guides
+- **Hook Setup Script**: `scripts/setup-hooks.sh` for verifying pre-commit hook installation
+
+#### Changed
+- **API Cleanup**: Simplified `zod_gen/src/lib.rs` by removing unused wrapper methods
+- **Format String Compliance**: Updated format strings in `zod_gen_derive` to comply with `clippy::uninlined-format-args`
+- **Enhanced README**: Added development tooling section with links to new documentation
+
+#### Fixed
+- **CI Consistency**: Resolved local vs CI clippy differences that could cause unexpected CI failures
+- **Code Quality**: Ensured all code passes strict clippy lints matching CI configuration
+
+This release ensures developers can't accidentally commit code that will fail CI, significantly improving the development workflow.
+
+## [1.1.0] - 2025-07-30
+
+### ✨ New Features
+
+#### Added
+- **Serde Rename Support**: Full support for `#[serde(rename = "...")]` attributes on enum variants
+  - TypeScript schemas now use the renamed values instead of Rust variant names
+  - Provides compile-time type safety between Rust serialization and TypeScript
+  - Example: `#[serde(rename = "active")]` generates `z.literal("active")` instead of `z.literal("Active")`
+
+#### Enhanced
+- **Comprehensive Examples**: Added `serde_rename_test.rs` demonstrating rename functionality
+- **Better Documentation**: Updated README with serde rename examples and use cases
+
+This feature closes the gap between Rust serialization and TypeScript type checking, ensuring developers can't accidentally use incorrect string literals.
+
 ## [1.0.0] - 2025-07-29
 
 ### 🎉 Initial Stable Release
