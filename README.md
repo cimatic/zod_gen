@@ -438,8 +438,15 @@ This project uses GitHub Actions for comprehensive automation:
 ```bash
 git clone https://github.com/cimatic/zod_gen.git
 cd zod_gen
-cargo test
+
+# The rust-toolchain.toml ensures you use the same Rust version as CI
+cargo test --workspace
+
+# Run clippy with CI-equivalent flags
+./scripts/clippy-ci.sh
 ```
+
+See [DEVELOPMENT.md](DEVELOPMENT.md) for detailed development guidelines and CI consistency tips.
 
 ### Running Examples
 

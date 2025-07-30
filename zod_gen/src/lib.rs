@@ -49,7 +49,7 @@ pub fn zod_enum(variants: &[&str]) -> String {
 }
 
 /// Generator that collects schemas and writes TypeScript files
-/// 
+///
 /// The `ZodGenerator` generates Zod schemas with proper serde rename support
 /// from Rust types, providing TypeScript type safety.
 pub struct ZodGenerator {
@@ -74,9 +74,9 @@ impl ZodGenerator {
         let schema = T::zod_schema();
         self.schemas.insert(name.to_string(), schema);
     }
-    
+
     /// Generate Zod schemas file
-    /// 
+    ///
     /// Creates a TypeScript file with Zod schemas and inferred types.
     pub fn generate(&self) -> String {
         let mut output =
@@ -194,7 +194,7 @@ mod tests {
         assert!(output.contains("DummySchema = z.string()"));
         assert!(output.contains("export type Dummy"));
     }
-    
+
     #[test]
     fn test_generate_schemas() {
         let mut gen = ZodGenerator::new();
@@ -204,8 +204,6 @@ mod tests {
         assert!(output.contains("import { z } from 'zod';"));
         assert!(output.contains("DummySchema = z.string()"));
     }
-    
-
 
     #[test]
     fn test_generic_hashmap() {
