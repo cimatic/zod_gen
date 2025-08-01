@@ -82,7 +82,7 @@ jobs:
         VERSION_WITHOUT_V=${VERSION#v}
         for i in {1..12}; do
           echo "Attempt $i: Checking if zod_gen ${VERSION} is available..."
-          if cargo info --registry crates-io zod_gen --version ${VERSION_WITHOUT_V} >/dev/null 2>&1; then
+          if cargo info --registry crates-io zod_gen 2>/dev/null | grep -q "^version: ${VERSION_WITHOUT_V}$"; then
             echo "zod_gen ${VERSION} is now available on crates.io!"
             exit 0
           fi
