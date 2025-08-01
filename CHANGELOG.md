@@ -238,6 +238,22 @@ export type Status = z.infer<typeof StatusSchema>;
 - Uses the standard cargo info output format which includes "version: X.Y.Z" line
 - No API changes, only release process improvement
 
+## [1.1.10] - 2025-08-01
+
+### 🐛 Fixed
+
+#### Release Workflow Registry Fix
+- **Fixed Local vs Registry Version Confusion**: Updated `cargo info` to use `--registry crates-io` flag to force checking published version instead of local version
+  - Previous attempts were failing because `cargo info zod_gen` was returning the local project version `(from ./zod_gen)` instead of the crates.io published version
+  - The `--registry crates-io` flag ensures cargo checks the actual published version on crates.io
+  - This should finally resolve the persistent "did not become available after 2 minutes" error
+  - Removes debug output line that was added for troubleshooting
+
+#### Technical Details
+- Updated `.github/workflows/release.yml` to use `cargo info --registry crates-io zod_gen`
+- Forces cargo to check the registry version instead of finding the local project
+- No API changes, only release process improvement
+
 ## [Unreleased]
 
 ### 🤖 Added
