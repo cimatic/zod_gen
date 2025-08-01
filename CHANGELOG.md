@@ -324,6 +324,23 @@ export type Status = z.infer<typeof StatusSchema>;
 - Shows variable values, command output, and pattern matching results
 - No API changes, only release process improvement and debugging enhancement
 
+## [1.1.15] - 2025-08-01
+
+### 🐛 Fixed
+
+#### Release Workflow Status Message Filtering Fix
+- **Fixed Pattern Matching with Status Messages**: Added filtering to exclude cargo status messages from version pattern matching
+  - Debug output revealed that cargo status messages ("Updating crates.io index", "Downloading crates...", "Downloaded zod_gen") were interfering with pattern matching
+  - The package was actually available and showing `version: 1.1.14` but the grep pattern wasn't matching due to mixed output
+  - Added `grep -v "Updating\|Downloading\|Downloaded"` to filter out status messages before pattern matching
+  - This should finally allow the version availability check to work correctly
+
+#### Technical Details
+- Updated `.github/workflows/release.yml` to filter cargo status messages before version pattern matching
+- Uses `grep -v` to exclude status lines, then `grep -q` to match the version pattern
+- Debug output helped identify the exact cause of pattern matching failure
+- No API changes, only release process improvement
+
 ## [Unreleased]
 
 ### 🤖 Added
