@@ -271,6 +271,23 @@ export type Status = z.infer<typeof StatusSchema>;
 - Ensures all cargo info commands check the registry version, not local version
 - No API changes, only release process improvement
 
+## [1.1.12] - 2025-08-01
+
+### 🐛 Fixed
+
+#### Release Workflow Version-Specific Check Fix
+- **Fixed Version Availability Check**: Changed from grep pattern matching to using `cargo info --version` with exit code checking
+  - Previous approach using `grep -q "version: ${VERSION_WITHOUT_V}"` was unreliable in GitHub Actions environment
+  - New approach uses `cargo info --registry crates-io zod_gen --version ${VERSION_WITHOUT_V}` which returns proper exit codes
+  - If the specific version exists, the command succeeds (exit code 0); if not, it fails (non-zero exit code)
+  - This is more reliable than parsing output format and should work consistently across environments
+
+#### Technical Details
+- Updated `.github/workflows/release.yml` to use `cargo info --version` instead of grep pattern matching
+- Uses exit code checking instead of output parsing for version availability
+- More robust approach that doesn't depend on output format variations
+- No API changes, only release process improvement
+
 ## [Unreleased]
 
 ### 🤖 Added
