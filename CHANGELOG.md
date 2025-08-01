@@ -206,6 +206,22 @@ export type Status = z.infer<typeof StatusSchema>;
 - Updated tests to verify the new import statement
 - This change affects generated TypeScript files but maintains API compatibility
 
+## [1.1.8] - 2025-08-01
+
+### 🐛 Fixed
+
+#### Release Workflow Reliability Fix
+- **Fixed Version Availability Check**: Replaced unreliable `cargo search | grep` with `cargo info --version` for checking package availability
+  - Resolves issue where `cargo search` doesn't return packages in expected format in GitHub Actions environment
+  - Uses `cargo info zod_gen --version ${VERSION}` which returns proper exit codes for version existence
+  - Ensures reliable automated releases by eliminating dependency on output format parsing
+  - Fixes the "did not become available after 2 minutes" error in release workflow
+
+#### Technical Details
+- Updated `.github/workflows/release.yml` wait step to use `cargo info` instead of `cargo search`
+- More reliable version checking that doesn't depend on parsing output format
+- No API changes, only release process improvement
+
 ## [Unreleased]
 
 ### 🤖 Added
