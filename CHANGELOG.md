@@ -254,6 +254,23 @@ export type Status = z.infer<typeof StatusSchema>;
 - Forces cargo to check the registry version instead of finding the local project
 - No API changes, only release process improvement
 
+## [1.1.11] - 2025-08-01
+
+### 🐛 Fixed
+
+#### Release Workflow Registry Flag Application Fix
+- **Fixed Missing Registry Flag**: Properly applied `--registry crates-io` flag to both cargo info commands in the release workflow
+  - Previous fix was incomplete - the debug line still used `cargo info zod_gen` without the registry flag
+  - Now both the debug output (removed) and the actual check use `--registry crates-io` to ensure consistent behavior
+  - Removes the debug output line that was showing local version instead of registry version
+  - This should finally resolve the version availability check issue
+
+#### Technical Details
+- Updated `.github/workflows/release.yml` to properly apply `--registry crates-io` flag
+- Removed debug output line that was causing confusion
+- Ensures all cargo info commands check the registry version, not local version
+- No API changes, only release process improvement
+
 ## [Unreleased]
 
 ### 🤖 Added
