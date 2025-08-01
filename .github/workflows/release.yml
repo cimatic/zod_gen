@@ -88,7 +88,12 @@ jobs:
           echo "DEBUG: cargo info output:"
           echo "${CARGO_INFO_OUTPUT}"
           echo "DEBUG: Looking for pattern: ^version: ${VERSION_WITHOUT_V}$"
-          if echo "${CARGO_INFO_OUTPUT}" | grep -v "Updating\|Downloading\|Downloaded" | grep -q "^version: ${VERSION_WITHOUT_V}$"; then
+          FILTERED_OUTPUT=$(echo "${CARGO_INFO_OUTPUT}" | grep -v "Updating\|Downloading\|Downloaded" | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//')
+          echo "DEBUG: Filtered output:"
+          echo "${FILTERED_OUTPUT}"
+          echo "DEBUG: Lines containing 'version:':"
+          echo "${FILTERED_OUTPUT}" | grep "version:"
+          if echo "${FILTERED_OUTPUT}" | grep -q "^version: ${VERSION_WITHOUT_V}$"; then
             echo "zod_gen ${VERSION} is now available on crates.io!"
             exit 0
           else
