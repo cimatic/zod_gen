@@ -306,6 +306,24 @@ export type Status = z.infer<typeof StatusSchema>;
 - Uses exact line matching for more reliable version detection
 - No API changes, only release process improvement
 
+## [1.1.14] - 2025-08-01
+
+### 🐛 Fixed
+
+#### Release Workflow Debug Output Addition
+- **Added Debug Output to Version Check**: Enhanced the version availability check with comprehensive debugging information
+  - Added debug output to show VERSION and VERSION_WITHOUT_V variables
+  - Added debug output to display the actual cargo info command output
+  - Added debug output to show the exact grep pattern being searched for
+  - Added debug output to indicate whether pattern matching succeeded or failed
+  - This will help identify the exact cause of version availability check failures
+  - Debug information will be visible in GitHub Actions logs for troubleshooting
+
+#### Technical Details
+- Updated `.github/workflows/release.yml` to include comprehensive debug output
+- Shows variable values, command output, and pattern matching results
+- No API changes, only release process improvement and debugging enhancement
+
 ## [Unreleased]
 
 ### 🤖 Added
