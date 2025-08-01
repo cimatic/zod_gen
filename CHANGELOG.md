@@ -158,6 +158,21 @@ export type Status = z.infer<typeof StatusSchema>;
 
 ---
 
+## [1.1.7] - 2025-08-01
+
+### 🐛 Fixed
+
+#### Release Workflow Bug Fix
+- **Fixed Version Display in Release Workflow**: Corrected double `v` prefix in logging messages
+  - Changed `v${VERSION}` to `${VERSION}` since `github.ref_name` already includes `v` prefix
+  - Prevents confusion in release logs and ensures proper version tracking
+  - This fixes the "vv1.1.6" issue seen in release logs
+
+#### Technical Details
+- Updated `.github/workflows/release.yml` wait step logging
+- Removed duplicate `v` prefix from version display messages
+- No API changes, only release process improvement
+
 ## [1.1.6] - 2025-08-01
 
 ### 🚀 Improved

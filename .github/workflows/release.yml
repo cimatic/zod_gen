@@ -81,15 +81,15 @@ jobs:
         VERSION=${{ github.ref_name }}
         VERSION_WITHOUT_V=${VERSION#v}
         for i in {1..12}; do
-          echo "Attempt $i: Checking if zod_gen v${VERSION} is available..."
+          echo "Attempt $i: Checking if zod_gen ${VERSION} is available..."
           if cargo search zod_gen | grep -q "zod_gen = \"${VERSION_WITHOUT_V}\""; then
-            echo "zod_gen v${VERSION} is now available on crates.io!"
+            echo "zod_gen ${VERSION} is now available on crates.io!"
             exit 0
           fi
           echo "Not available yet, waiting 10 seconds..."
           sleep 10
         done
-        echo "ERROR: zod_gen v${VERSION} did not become available after 2 minutes"
+        echo "ERROR: zod_gen ${VERSION} did not become available after 2 minutes"
         exit 1
     
     - name: Publish zod_gen_derive
