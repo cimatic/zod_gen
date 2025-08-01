@@ -93,7 +93,7 @@ jobs:
           echo "${FILTERED_OUTPUT}"
           echo "DEBUG: Lines containing 'version:':"
           echo "${FILTERED_OUTPUT}" | grep "version:"
-          if echo "${FILTERED_OUTPUT}" | grep -q "^version: ${VERSION_WITHOUT_V}$"; then
+          if echo "${FILTERED_OUTPUT}" | grep "^version: " | grep -q "${VERSION_WITHOUT_V}"; then
             echo "zod_gen ${VERSION} is now available on crates.io!"
             exit 0
           else
