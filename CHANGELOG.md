@@ -158,6 +158,23 @@ export type Status = z.infer<typeof StatusSchema>;
 
 ---
 
+## [1.1.6] - 2025-08-01
+
+### 🚀 Improved
+
+#### Release Process Enhancements
+- **Fixed GitHub Actions Release Workflow**: Resolved dependency order issue in automated releases
+  - Updated dry run validation to only check `zod_gen` since `zod_gen_derive` depends on unpublished version
+  - Replaced fixed 30-second wait with intelligent polling that checks crates.io availability
+  - Fixed version pattern matching to handle `v1.1.6` vs `1.1.6` format differences
+  - Ensures reliable automated releases for future versions
+
+#### Technical Details
+- Modified `.github/workflows/release.yml` to handle package dependencies correctly
+- Added intelligent version availability checking with retry logic
+- Improved error handling and logging in release workflow
+- This change only affects the release process, not the library API
+
 ## [1.1.5] - 2025-08-01
 
 ### 🐛 Fixed

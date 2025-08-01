@@ -81,8 +81,8 @@
 //!
 //! ```toml
 //! [dependencies]
-//! zod_gen = "1.1.5"
-//! zod_gen_derive = "1.1.5"
+//! zod_gen = "1.1.6"
+//! zod_gen_derive = "1.1.6"
 //! serde = { version = "1.0", features = ["derive"] }
 //! ```
 
