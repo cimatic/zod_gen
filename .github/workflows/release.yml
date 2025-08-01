@@ -75,41 +75,23 @@ jobs:
       env:
         CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
-    - name: Wait for zod_gen to be available
+    - name: Publish zod_gen_derive with retry
       run: |
-        echo "Waiting for zod_gen to be available on crates.io..."
-        VERSION=${{ github.ref_name }}
-        VERSION_WITHOUT_V=${VERSION#v}
-        echo "DEBUG: VERSION=${VERSION}, VERSION_WITHOUT_V=${VERSION_WITHOUT_V}"
+        echo "Publishing zod_gen_derive (will retry if zod_gen dependency not available yet)..."
         for i in {1..12}; do
-          echo "Attempt $i: Checking if zod_gen ${VERSION} is available..."
-          echo "DEBUG: Running cargo info --registry crates-io zod_gen"
-          CARGO_INFO_OUTPUT=$(cargo info --registry crates-io zod_gen 2>&1)
-          echo "DEBUG: cargo info output:"
-          echo "${CARGO_INFO_OUTPUT}"
-          echo "DEBUG: Looking for pattern: ^version: ${VERSION_WITHOUT_V}$"
-          FILTERED_OUTPUT=$(echo "${CARGO_INFO_OUTPUT}" | grep -v "Updating\|Downloading\|Downloaded" | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//')
-          echo "DEBUG: Filtered output:"
-          echo "${FILTERED_OUTPUT}"
-          echo "DEBUG: Lines containing 'version:':"
-          echo "${FILTERED_OUTPUT}" | grep "version:"
-          if echo "${FILTERED_OUTPUT}" | grep "^version: " | grep -q "${VERSION_WITHOUT_V}"; then
-            echo "zod_gen ${VERSION} is now available on crates.io!"
+          echo "Attempt $i: Publishing zod_gen_derive..."
+          if cargo publish -p zod_gen_derive; then
+            echo "zod_gen_derive published successfully!"
             exit 0
           else
-            echo "DEBUG: Pattern not found in output"
+            echo "Publish failed (likely zod_gen dependency not available yet), waiting 10 seconds before retry..."
+            sleep 10
           fi
-          echo "Not available yet, waiting 10 seconds..."
-          sleep 10
         done
-        echo "ERROR: zod_gen ${VERSION} did not become available after 2 minutes"
+        echo "ERROR: Failed to publish zod_gen_derive after 12 attempts"
         exit 1
-
-    - name: Publish zod_gen_derive
-      run: cargo publish -p zod_gen_derive
       env:
         CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-
   github-release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
