@@ -88,7 +88,7 @@ jobs:
           echo "DEBUG: cargo info output:"
           echo "${CARGO_INFO_OUTPUT}"
           echo "DEBUG: Looking for pattern: ^version: ${VERSION_WITHOUT_V}$"
-          if echo "${CARGO_INFO_OUTPUT}" | grep -q "^version: ${VERSION_WITHOUT_V}$"; then
+          if echo "${CARGO_INFO_OUTPUT}" | grep -v "Updating\|Downloading\|Downloaded" | grep -q "^version: ${VERSION_WITHOUT_V}$"; then
             echo "zod_gen ${VERSION} is now available on crates.io!"
             exit 0
           else
