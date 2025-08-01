@@ -288,6 +288,24 @@ export type Status = z.infer<typeof StatusSchema>;
 - More robust approach that doesn't depend on output format variations
 - No API changes, only release process improvement
 
+## [1.1.13] - 2025-08-01
+
+### 🐛 Fixed
+
+#### Release Workflow Exact Pattern Matching Fix
+- **Fixed Version Pattern Matching**: Updated grep pattern to use exact line matching with `^version: ${VERSION_WITHOUT_V}$`
+  - Previous attempt used non-existent `--version` flag for cargo info command
+  - New approach uses exact line matching to ensure we match the complete version line
+  - Added `2>/dev/null` to suppress error messages and focus on successful output
+  - Uses `^` and `$` anchors to match the entire line exactly, preventing partial matches
+
+#### Technical Details
+- Updated `.github/workflows/release.yml` to use `grep -q "^version: ${VERSION_WITHOUT_V}$"`
+- Removed invalid `--version` flag from cargo info command
+- Added error suppression to clean up output
+- Uses exact line matching for more reliable version detection
+- No API changes, only release process improvement
+
 ## [Unreleased]
 
 ### 🤖 Added
