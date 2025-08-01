@@ -25,8 +25,8 @@ Add both crates to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-zod_gen = "1.1.4"
-zod_gen_derive = "1.1.4"
+zod_gen = "1.1.5"
+zod_gen_derive = "1.1.5"
 ```
 
 ## 🔧 Quick Start
@@ -125,7 +125,7 @@ The generated TypeScript provides both Zod schemas and inferred types in a singl
 
 ```typescript
 // Generated schemas.ts
-import { z } from 'zod';
+import * as z from 'zod';
 
 export const UserSchema = z.object({
   id: z.number(),

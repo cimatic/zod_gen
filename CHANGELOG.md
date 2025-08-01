@@ -158,6 +158,22 @@ export type Status = z.infer<typeof StatusSchema>;
 
 ---
 
+## [1.1.5] - 2025-08-01
+
+### 🐛 Fixed
+
+#### Critical Bug Fix
+- **Parcel Bundler Compatibility**: Fixed import statement generation to use `import * as z from 'zod';` instead of `import { z } from 'zod';`
+  - Resolves runtime error `i.z.string is not a function` when bundled with Parcel
+  - Ensures Zod validation works correctly in Parcel-based applications
+  - Maintains full backward compatibility with existing functionality
+
+#### Technical Details
+- Updated `ZodGenerator::generate()` method in `zod_gen/src/lib.rs`
+- Updated all documentation examples to use the correct import format
+- Updated tests to verify the new import statement
+- This change affects generated TypeScript files but maintains API compatibility
+
 ## [Unreleased]
 
 ### 🤖 Added
