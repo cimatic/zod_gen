@@ -222,6 +222,22 @@ export type Status = z.infer<typeof StatusSchema>;
 - More reliable version checking that doesn't depend on parsing output format
 - No API changes, only release process improvement
 
+## [1.1.9] - 2025-08-01
+
+### 🐛 Fixed
+
+#### Release Workflow Final Fix
+- **Fixed Version Availability Check**: Updated to use `cargo info zod_gen | grep -q "version: ${VERSION_WITHOUT_V}"` for reliable package availability detection
+  - This approach is more reliable than previous attempts as it uses the standard cargo info output format
+  - Resolves the persistent "did not become available after 2 minutes" error in GitHub Actions
+  - Ensures automated releases work consistently by checking for the version string in cargo info output
+  - Final fix for the release workflow that was causing multiple release failures
+
+#### Technical Details
+- Updated `.github/workflows/release.yml` line 85 with the correct cargo info and grep pattern
+- Uses the standard cargo info output format which includes "version: X.Y.Z" line
+- No API changes, only release process improvement
+
 ## [Unreleased]
 
 ### 🤖 Added
