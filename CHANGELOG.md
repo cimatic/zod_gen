@@ -377,6 +377,25 @@ export type Status = z.infer<typeof StatusSchema>;
 - More robust approach that handles multiple version-related lines in cargo info output
 - No API changes, only release process improvement
 
+## [1.1.18] - 2025-08-01
+
+### 🐛 Fixed
+
+#### Release Workflow Direct Publish Retry Approach
+- **Replaced Complex Version Detection with Simple Retry**: Eliminated the problematic version availability check in favor of direct publish retry
+  - Removed all the complex cargo info parsing, pattern matching, and debug output that was consistently failing
+  - New approach simply retries `cargo publish -p zod_gen_derive` up to 12 times with 10-second intervals
+  - If `zod_gen` is available, the publish succeeds immediately; if not, it fails and retries
+  - Much simpler, more reliable approach that lets cargo handle the dependency resolution
+  - Eliminates all the pattern matching issues we've been debugging
+
+#### Technical Details
+- Updated `.github/workflows/release.yml` to use direct publish retry instead of version detection
+- Removed complex cargo info parsing and grep pattern matching logic
+- Uses cargo's built-in dependency resolution to determine when zod_gen is available
+- Retries up to 12 times (2 minutes) with clear logging of each attempt
+- No API changes, only release process simplification and improvement
+
 ## [Unreleased]
 
 ### 🤖 Added

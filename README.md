@@ -25,8 +25,8 @@ Add both crates to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-zod_gen = "1.1.17"
-zod_gen_derive = "1.1.17"
+zod_gen = "1.1.18"
+zod_gen_derive = "1.1.18"
 ```
 
 ## 🔧 Quick Start
