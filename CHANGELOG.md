@@ -359,6 +359,24 @@ export type Status = z.infer<typeof StatusSchema>;
 - Shows both filtered output and specific version lines for detailed troubleshooting
 - No API changes, only release process improvement and debugging enhancement
 
+## [1.1.17] - 2025-08-01
+
+### 🐛 Fixed
+
+#### Release Workflow Version Line Specific Matching Fix
+- **Fixed Version Pattern Matching**: Changed from exact line pattern to specific version line matching
+  - Debug output revealed there are multiple lines containing 'version:' (`version: 1.1.16` and `rust-version: unknown`)
+  - The exact line pattern `^version: ${VERSION_WITHOUT_V}$` was failing despite the correct line being present
+  - New approach uses `grep "^version: " | grep -q "${VERSION_WITHOUT_V}"` to first isolate the version line, then check for the version number
+  - This should finally resolve the pattern matching issue that was preventing version availability detection
+
+#### Technical Details
+- Updated `.github/workflows/release.yml` to use two-stage grep for version line matching
+- First grep isolates lines starting with "version: " (excluding "rust-version:")
+- Second grep checks if the version number is present in that line
+- More robust approach that handles multiple version-related lines in cargo info output
+- No API changes, only release process improvement
+
 ## [Unreleased]
 
 ### 🤖 Added
