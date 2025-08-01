@@ -341,6 +341,24 @@ export type Status = z.infer<typeof StatusSchema>;
 - Debug output helped identify the exact cause of pattern matching failure
 - No API changes, only release process improvement
 
+## [1.1.16] - 2025-08-01
+
+### 🐛 Fixed
+
+#### Release Workflow Enhanced Debug and Whitespace Handling
+- **Added Enhanced Debug Output**: Added more comprehensive debugging to identify pattern matching issues
+  - Shows filtered output after removing status messages
+  - Shows lines containing 'version:' specifically
+  - Added whitespace trimming with sed to handle potential leading/trailing spaces
+  - This will help identify if there are hidden characters or formatting issues preventing pattern matching
+  - Previous debug showed the version line was present but pattern matching still failed
+
+#### Technical Details
+- Updated `.github/workflows/release.yml` with enhanced debug output and whitespace handling
+- Added sed commands to trim leading and trailing whitespace from filtered output
+- Shows both filtered output and specific version lines for detailed troubleshooting
+- No API changes, only release process improvement and debugging enhancement
+
 ## [Unreleased]
 
 ### 🤖 Added
