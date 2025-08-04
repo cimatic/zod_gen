@@ -396,6 +396,27 @@ export type Status = z.infer<typeof StatusSchema>;
 - Retries up to 12 times (2 minutes) with clear logging of each attempt
 - No API changes, only release process simplification and improvement
 
+## [1.1.19] - 2025-08-04
+
+### 🐛 Fixed
+
+#### Dependencies Workflow Fix
+- **Fixed cargo upgrade command**: Removed invalid `--workspace` flag from `cargo upgrade` in dependencies workflow
+  - The `cargo upgrade` command from cargo-edit doesn't support the `--workspace` flag
+  - Updated `.github/workflows/dependencies.yml` to use `cargo upgrade` without the flag
+  - This fixes the weekly dependency update automation that was failing due to the invalid flag
+  - Also cleaned up trailing whitespace in the workflow file
+
+### 📚 Documentation
+- **Added AI Agent Debugging Guide**: Added comprehensive documentation about "Let it crash" debugging philosophy
+  - `ai-agent-prompt.md`: Guide for AI agents on embracing failure as signal rather than avoiding it
+  - `let-it-crash-lesson.md`: Real-world lesson from 18 failed release attempts and the breakthrough solution
+  - Documents the anti-pattern of complex failure avoidance vs. simple retry mechanisms
+
+#### Technical Details
+- Updated dependencies workflow to use correct cargo-edit syntax
+- No API changes, only CI/CD process improvement and documentation additions
+
 ## [Unreleased]
 
 ### 🤖 Added
