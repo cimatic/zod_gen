@@ -1,3 +1,4 @@
+use serde::Serialize;
 use zod_gen::ZodSchema as _;
 use zod_gen_derive::ZodSchema;
 
@@ -27,4 +28,17 @@ fn test_enum_schema() {
     let schema = TestEnum::zod_schema();
     assert!(schema.contains("z.literal('Foo')"));
     assert!(schema.contains("z.literal('Bar')"));
+}
+
+#[derive(ZodSchema, Serialize)]
+#[allow(dead_code)]
+struct TestStructWithRename {
+    #[serde(rename = "FOOBAR")]
+    foobar: String,
+}
+
+#[test]
+fn test_struct_rename() {
+    let schema = TestStructWithRename::zod_schema();
+    assert!(schema.contains("FOOBAR: z.string()"));
 }

@@ -9,6 +9,7 @@ use zod_gen_derive::ZodSchema;
 
 #[derive(ZodSchema, Debug, Clone, Serialize, Deserialize)]
 struct User {
+    #[serde(rename = "user_name")]
     name: String,
     status: UserStatus,
     priority: Priority,
@@ -59,6 +60,17 @@ fn main() {
     println!("{schemas}");
 
     println!("=== Individual Schema Verification ===");
+    println!();
+
+    println!("User schema (with serde rename):");
+    let user_schema = User::zod_schema();
+    println!("Generated: {user_schema}");
+    // Test that it contains the serde rename values
+    assert!(
+        user_schema.contains("user_name"),
+        "Schema should contain user_name"
+    );
+    println!("✅ User correctly uses serde rename values");
     println!();
 
     println!("UserStatus schema (with serde rename):");
