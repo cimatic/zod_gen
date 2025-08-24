@@ -2,14 +2,14 @@ extern crate proc_macro;
 
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{parse_macro_input, Data, DeriveInput, Fields, LitStr};
+use syn::{parse_macro_input, Attribute, Data, DeriveInput, Fields, LitStr};
 
-/// Helper function to extract the serde rename value from variant attributes
+/// Helper function to extract the serde rename value from attributes
 ///
-/// Returns the renamed value if #[serde(rename = "...")] is found,
-/// otherwise returns the variant name as a string.
-fn extract_serde_rename(variant: &syn::Variant) -> String {
-    for attr in &variant.attrs {
+/// Returns the renamed value if #[serde(rename = "...")] is found, otherwise
+/// None
+fn find_serde_rename_from_attrs(attrs: &Vec<Attribute>) -> Option<String> {
+    for attr in attrs {
         if attr.path().is_ident("serde") {
             // Convert the attribute to a string and parse it manually
             let attr_str = quote!(#attr).to_string();
@@ -21,14 +21,26 @@ fn extract_serde_rename(variant: &syn::Variant) -> String {
                     if let Some(quote_end) = rename_part[quote_start + 1..].find('"') {
                         let rename_value =
                             &rename_part[quote_start + 1..quote_start + 1 + quote_end];
-                        return rename_value.to_string();
+                        return Some(rename_value.to_string());
                     }
                 }
             }
         }
     }
-    // Fallback to variant name if no serde rename found
-    variant.ident.to_string()
+    None
+}
+
+/// Helper function to extract the serde rename value from variant attributes
+///
+/// Returns the renamed value if #[serde(rename = "...")] is found,
+/// otherwise returns the variant name as a string.
+fn extract_serde_rename_variant(variant: &syn::Variant) -> String {
+    if let Some(rename_value) = find_serde_rename_from_attrs(&variant.attrs) {
+        rename_value
+    } else {
+        // Fallback to variant name if no serde rename found
+        variant.ident.to_string()
+    }
 }
 
 /// Derive macro for ZodSchema
@@ -42,7 +54,9 @@ pub fn derive_zod_schema(input: TokenStream) -> TokenStream {
             Fields::Named(fields_named) => {
                 let fields = fields_named.named.iter().map(|f| {
                     let ident = f.ident.as_ref().unwrap();
-                    let field_name = LitStr::new(&ident.to_string(), ident.span());
+                    let ident_name =
+                        find_serde_rename_from_attrs(&f.attrs).unwrap_or_else(|| ident.to_string());
+                    let field_name = LitStr::new(&ident_name, ident.span());
                     let ty = &f.ty;
                     quote! { (#field_name, <#ty as zod_gen::ZodSchema>::zod_schema().as_str()) }
                 });
@@ -58,7 +72,7 @@ pub fn derive_zod_schema(input: TokenStream) -> TokenStream {
         },
         Data::Enum(data_enum) => {
             let variants = data_enum.variants.iter().map(|v| {
-                let renamed_value = extract_serde_rename(v);
+                let renamed_value = extract_serde_rename_variant(v);
                 let var_name = LitStr::new(&renamed_value, v.ident.span());
                 quote! { #var_name }
             });
