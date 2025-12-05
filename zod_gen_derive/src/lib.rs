@@ -45,7 +45,7 @@ fn find_serde_tag_from_attrs(attrs: &[Attribute]) -> String {
             }
         }
     }
-    "enumField".to_string()
+    "type".to_string()
 }
 
 /// Helper function to extract the serde rename value from variant attributes
@@ -108,14 +108,14 @@ pub fn derive_zod_schema(input: TokenStream) -> TokenStream {
                     .collect();
 
                 quote! {
-                    let __owned_literals: Vec<String> = vec![
+                    let owned_literals: Vec<String> = vec![
                         #(#literal_variants.to_string()),*
                     ];
-                    let __literal_refs: Vec<&str> = __owned_literals
+                    let literal_refs: Vec<&str> = owned_literals
                         .iter()
                         .map(|s| s.as_str())
                         .collect();
-                    zod_gen::zod_union(&__literal_refs)
+                    zod_gen::zod_union(&literal_refs)
                 }
             } else {
                 // If at least one variant is not a Unit variant. Generates a discriminated union of objects with a dedicated key.
@@ -130,9 +130,9 @@ pub fn derive_zod_schema(input: TokenStream) -> TokenStream {
                                Fields::Unit => {
                                    quote! {
                                        {
-                                           let __literal_schema = zod_gen::zod_literal(#variant_literal_val);
+                                           let literal_schema = zod_gen::zod_literal(#variant_literal_val);
                                            zod_gen::zod_object(&[
-                                               (#tag_key_lit, __literal_schema.as_str())
+                                               (#tag_key_lit, literal_schema.as_str())
                                            ])
                                        }
                                    }
@@ -142,9 +142,9 @@ pub fn derive_zod_schema(input: TokenStream) -> TokenStream {
                                        let field_type = &fields.unnamed.first().unwrap().ty;
                                        quote! {
                                            {
-                                               let __literal_schema = zod_gen::zod_literal(#variant_literal_val);
+                                               let literal_schema = zod_gen::zod_literal(#variant_literal_val);
                                                zod_gen::zod_object(&[
-                                                   (#tag_key_lit, __literal_schema.as_str()),
+                                                   (#tag_key_lit, literal_schema.as_str()),
                                                    ("data", &<#field_type as zod_gen::ZodSchema>::zod_schema())
                                                ])
                                            }
@@ -157,11 +157,11 @@ pub fn derive_zod_schema(input: TokenStream) -> TokenStream {
                                        });
                                        quote! {
                                            {
-                                               let __literal_schema = zod_gen::zod_literal(#variant_literal_val);
-                                               let __inner_data_object = zod_gen::zod_object(&[#(#inner_fields),*]);
+                                               let literal_schema = zod_gen::zod_literal(#variant_literal_val);
+                                               let inner_data_object = zod_gen::zod_object(&[#(#inner_fields),*]);
                                                zod_gen::zod_object(&[
-                                                   (#tag_key_lit, __literal_schema.as_str()),
-                                                   ("data", __inner_data_object.as_str())
+                                                   (#tag_key_lit, literal_schema.as_str()),
+                                                   ("data", inner_data_object.as_str())
                                                ])
                                            }
                                        }
@@ -178,9 +178,9 @@ pub fn derive_zod_schema(input: TokenStream) -> TokenStream {
                                    });
                                    quote! {
                                        {
-                                           let __literal_schema = zod_gen::zod_literal(#variant_literal_val);
+                                           let literal_schema = zod_gen::zod_literal(#variant_literal_val);
                                            zod_gen::zod_object(&[
-                                               (#tag_key_lit, __literal_schema.as_str()),
+                                               (#tag_key_lit, literal_schema.as_str()),
                                                #(#inner_fields),*
                                            ])
                                        }
@@ -190,14 +190,14 @@ pub fn derive_zod_schema(input: TokenStream) -> TokenStream {
                        }).collect();
 
                 quote! {
-                    let __owned_schemas: Vec<String> = vec![
+                    let owned_schemas: Vec<String> = vec![
                         #(#variant_schema_tokens.to_string()),*
                     ];
-                    let __schema_refs: Vec<&str> = __owned_schemas
+                    let schema_refs: Vec<&str> = owned_schemas
                         .iter()
                         .map(|s| s.as_str())
                         .collect();
-                    zod_gen::zod_union(&__schema_refs)
+                    zod_gen::zod_union(&schema_refs)
                 }
             };
 
