@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2025-12-05
+
+### ✨ Added
+
+#### Struct Field Serde Rename Support
+- **Extended serde rename to struct fields**: Previously only enum variants supported `#[serde(rename = "...")]`, now struct fields do too
+  - Struct fields with `#[serde(rename = "new_name")]` generate TypeScript schemas with the renamed field names
+  - Ensures perfect alignment between Rust serialization and TypeScript types for structs
+  - Example: `#[serde(rename = "userName")]` generates `userName: z.string()` instead of `user_name: z.string()`
+  - Thanks to @julienr for this contribution!
+
+#### Stable Schema Ordering
+- **Deterministic output for CI workflows**: Switched from `HashMap` to `BTreeMap` for schema storage
+  - Generated TypeScript files now have stable, alphabetically sorted schema ordering
+  - Eliminates spurious diffs in version control when schemas are checked in
+  - Essential for CI workflows that validate generated files match committed versions
+  - Thanks to @julienr for this contribution!
+
+### 🔧 Code Quality
+
+- Refactored attribute parsing to use idiomatic `&[Attribute]` slice parameter
+- Moved `serde` dependency to dev-dependencies (only needed for tests)
+- Added comprehensive test coverage for struct field renaming
+
+### 📚 Examples
+
+- Enhanced `serde_rename_test.rs` to demonstrate struct field renaming
+- Added test case `test_struct_rename()` in derive tests
+
 ## [1.1.4] - 2025-07-30
 
 ### 📚 Documentation Improvements
