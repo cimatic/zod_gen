@@ -20,7 +20,12 @@ path = "generator_example.rs"
 name = "serde_rename_test"
 path = "serde_rename_test.rs"
 
+[[example]]
+name = "discriminated_unions"
+path = "discriminated_unions.rs"
+
 [dependencies]
 zod_gen = { path = "../zod_gen" }
 zod_gen_derive = { path = "../zod_gen_derive" }
 serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
