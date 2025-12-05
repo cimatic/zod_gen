@@ -123,12 +123,12 @@ pub fn zod_object(fields: &[(&str, &str)]) -> String {
     format!("z.object({{\n{}\n}})", items.join(",\n"))
 }
 
-pub fn zod_enum(variants: &[&str]) -> String {
-    let lits: Vec<String> = variants
-        .iter()
-        .map(|v| format!("z.literal('{v}')"))
-        .collect();
-    format!("z.union([{}])", lits.join(", "))
+pub fn zod_literal(value: &str) -> String {
+    format!("z.literal('{value}')")
+}
+
+pub fn zod_union(variants: &[&str]) -> String {
+    format!("z.union([{}])", variants.join(", "))
 }
 
 /// Generator that collects schemas and writes TypeScript files

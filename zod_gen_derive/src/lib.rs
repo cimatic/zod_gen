@@ -1,8 +1,8 @@
 extern crate proc_macro;
 
 use proc_macro::TokenStream;
-use quote::quote;
-use syn::{parse_macro_input, Attribute, Data, DeriveInput, Fields, LitStr};
+use quote::{quote, ToTokens};
+use syn::{parse_macro_input, spanned::Spanned, Attribute, Data, DeriveInput, Fields, LitStr};
 
 /// Helper function to extract the serde rename value from attributes
 ///
@@ -30,6 +30,24 @@ fn find_serde_rename_from_attrs(attrs: &[Attribute]) -> Option<String> {
     None
 }
 
+fn find_serde_tag_from_attrs(attrs: &[Attribute]) -> String {
+    for attr in attrs {
+        if attr.path().is_ident("serde") {
+            let attr_str = attr.to_token_stream().to_string();
+            if let Some(tag_start) = attr_str.find("tag") {
+                let tag_part = &attr_str[tag_start..];
+                if let Some(quote_start) = tag_part.find('"') {
+                    if let Some(quote_end) = tag_part[quote_start + 1..].find('"') {
+                        let tag_value = &tag_part[quote_start + 1..quote_start + 1 + quote_end];
+                        return tag_value.to_string();
+                    }
+                }
+            }
+        }
+    }
+    "type".to_string()
+}
+
 /// Helper function to extract the serde rename value from variant attributes
 ///
 /// Returns the renamed value if #[serde(rename = "...")] is found,
@@ -48,6 +66,7 @@ fn extract_serde_rename_variant(variant: &syn::Variant) -> String {
 pub fn derive_zod_schema(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     let name = &input.ident;
+    let name_span = name.span();
 
     let expanded = match input.data {
         Data::Struct(data_struct) => match data_struct.fields {
@@ -71,15 +90,121 @@ pub fn derive_zod_schema(input: TokenStream) -> TokenStream {
             _ => panic!("ZodSchema derive only supports structs with named fields"),
         },
         Data::Enum(data_enum) => {
-            let variants = data_enum.variants.iter().map(|v| {
-                let renamed_value = extract_serde_rename_variant(v);
-                let var_name = LitStr::new(&renamed_value, v.ident.span());
-                quote! { #var_name }
-            });
+            let all_unit_variants = data_enum
+                .variants
+                .iter()
+                .all(|v| matches!(v.fields, Fields::Unit));
+
+            let enum_schema_tokens = if all_unit_variants {
+                // If all enum variants are Unit variants, the schema will be a union of literals.
+                let literal_variants: Vec<proc_macro2::TokenStream> = data_enum
+                    .variants
+                    .iter()
+                    .map(|v| {
+                        let renamed_value = extract_serde_rename_variant(v);
+                        let variant_literal_val = LitStr::new(&renamed_value, v.ident.span());
+                        quote! { zod_gen::zod_literal(#variant_literal_val) }
+                    })
+                    .collect();
+
+                quote! {
+                    let owned_literals: Vec<String> = vec![
+                        #(#literal_variants.to_string()),*
+                    ];
+                    let literal_refs: Vec<&str> = owned_literals
+                        .iter()
+                        .map(|s| s.as_str())
+                        .collect();
+                    zod_gen::zod_union(&literal_refs)
+                }
+            } else {
+                // If at least one variant is not a Unit variant. Generates a discriminated union of objects with a dedicated key.
+                let tag_field = find_serde_tag_from_attrs(&input.attrs);
+                let tag_key_lit = LitStr::new(&tag_field, name_span);
+
+                let variant_schema_tokens: Vec<proc_macro2::TokenStream> = data_enum.variants.iter().map(|v| {
+                           let renamed_value = extract_serde_rename_variant(v);
+                           let variant_literal_val = LitStr::new(&renamed_value, v.ident.span());
+
+                           match &v.fields {
+                               Fields::Unit => {
+                                   quote! {
+                                       {
+                                           let literal_schema = zod_gen::zod_literal(#variant_literal_val);
+                                           zod_gen::zod_object(&[
+                                               (#tag_key_lit, literal_schema.as_str())
+                                           ])
+                                       }
+                                   }
+                               }
+                               Fields::Unnamed(fields) => {
+                                   if fields.unnamed.len() == 1 {
+                                       let field_type = &fields.unnamed.first().unwrap().ty;
+                                       quote! {
+                                           {
+                                               let literal_schema = zod_gen::zod_literal(#variant_literal_val);
+                                               zod_gen::zod_object(&[
+                                                   (#tag_key_lit, literal_schema.as_str()),
+                                                   ("data", &<#field_type as zod_gen::ZodSchema>::zod_schema())
+                                               ])
+                                           }
+                                       }
+                                   } else {
+                                       let inner_fields = fields.unnamed.iter().enumerate().map(|(i, f)| {
+                                           let field_name = LitStr::new(&i.to_string(), f.span());
+                                           let field_type = &f.ty;
+                                           quote! { (#field_name, &<#field_type as zod_gen::ZodSchema>::zod_schema()) }
+                                       });
+                                       quote! {
+                                           {
+                                               let literal_schema = zod_gen::zod_literal(#variant_literal_val);
+                                               let inner_data_object = zod_gen::zod_object(&[#(#inner_fields),*]);
+                                               zod_gen::zod_object(&[
+                                                   (#tag_key_lit, literal_schema.as_str()),
+                                                   ("data", inner_data_object.as_str())
+                                               ])
+                                           }
+                                       }
+                                   }
+                               }
+                               Fields::Named(fields) => {
+                                   let inner_fields = fields.named.iter().map(|f| {
+                                       let ident = f.ident.as_ref().unwrap();
+                                       let ident_name = find_serde_rename_from_attrs(&f.attrs)
+                                           .unwrap_or_else(|| ident.to_string());
+                                       let field_name = LitStr::new(&ident_name, ident.span());
+                                       let ty = &f.ty;
+                                       quote! { (#field_name, &<#ty as zod_gen::ZodSchema>::zod_schema()) }
+                                   });
+                                   quote! {
+                                       {
+                                           let literal_schema = zod_gen::zod_literal(#variant_literal_val);
+                                           zod_gen::zod_object(&[
+                                               (#tag_key_lit, literal_schema.as_str()),
+                                               #(#inner_fields),*
+                                           ])
+                                       }
+                                   }
+                               }
+                           }
+                       }).collect();
+
+                quote! {
+                    let owned_schemas: Vec<String> = vec![
+                        #(#variant_schema_tokens.to_string()),*
+                    ];
+                    let schema_refs: Vec<&str> = owned_schemas
+                        .iter()
+                        .map(|s| s.as_str())
+                        .collect();
+                    zod_gen::zod_union(&schema_refs)
+                }
+            };
+
             quote! {
                 impl zod_gen::ZodSchema for #name {
                     fn zod_schema() -> String {
-                        zod_gen::zod_enum(&[#(#variants),*])
+                        #enum_schema_tokens
                     }
                 }
             }
