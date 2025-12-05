@@ -86,7 +86,7 @@
 //! serde = { version = "1.0", features = ["derive"] }
 //! ```
 
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 /// Trait for Rust types that can produce a Zod schema
 pub trait ZodSchema {
@@ -136,7 +136,9 @@ pub fn zod_enum(variants: &[&str]) -> String {
 /// The `ZodGenerator` generates Zod schemas with proper serde rename support
 /// from Rust types, providing TypeScript type safety.
 pub struct ZodGenerator {
-    schemas: HashMap<String, String>,
+    // Use a btreemap so we retain key order which is useful to ensure the
+    // output is stable (e.g. if zod_gen is run on CI)
+    schemas: BTreeMap<String, String>,
 }
 
 impl Default for ZodGenerator {
@@ -148,7 +150,7 @@ impl Default for ZodGenerator {
 impl ZodGenerator {
     pub fn new() -> Self {
         Self {
-            schemas: HashMap::new(),
+            schemas: BTreeMap::new(),
         }
     }
 
