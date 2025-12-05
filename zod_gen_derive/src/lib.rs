@@ -8,7 +8,7 @@ use syn::{parse_macro_input, Attribute, Data, DeriveInput, Fields, LitStr};
 ///
 /// Returns the renamed value if #[serde(rename = "...")] is found, otherwise
 /// None
-fn find_serde_rename_from_attrs(attrs: &Vec<Attribute>) -> Option<String> {
+fn find_serde_rename_from_attrs(attrs: &[Attribute]) -> Option<String> {
     for attr in attrs {
         if attr.path().is_ident("serde") {
             // Convert the attribute to a string and parse it manually
