@@ -1,3 +1,11 @@
+error: proc-macro derive panicked
+ --> tests/ui/internal_tag_tuple.rs
+  |
+  | #[derive(ZodSchema, Serialize, Deserialize)]
+  |          ^^^^^^^^^
+  |
+  = help: message: #[serde(tag = "...")] cannot be used with tuple variants
+
 error: #[serde(tag = "...")] cannot be used with tuple variants
  --> tests/ui/internal_tag_tuple.rs
   |

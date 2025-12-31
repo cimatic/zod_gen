@@ -123,6 +123,26 @@ pub fn zod_object(fields: &[(&str, &str)]) -> String {
     format!("z.object({{\n{}\n}})", items.join(",\n"))
 }
 
+pub fn zod_literal(value: &str) -> String {
+    format!("z.literal('{value}')")
+}
+
+pub fn zod_union(variants: &[&str]) -> String {
+    format!("z.union([{}])", variants.join(", "))
+}
+
+pub fn zod_discriminated_union(tag_key: &str, variants: &[&str]) -> String {
+    format!("z.discriminatedUnion('{tag_key}', [{}])", variants.join(", "))
+}
+
+pub fn zod_tuple(items: &[&str]) -> String {
+    format!("z.tuple([{}])", items.join(", "))
+}
+
+pub fn zod_null() -> &'static str {
+    "z.null()"
+}
+
 pub fn zod_enum(variants: &[&str]) -> String {
     let lits: Vec<String> = variants
         .iter()
