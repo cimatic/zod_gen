@@ -262,15 +262,26 @@ pub fn derive_zod_schema(input: TokenStream) -> TokenStream {
                             Fields::Unnamed(fields) => {
                                 if fields.unnamed.len() == 1 {
                                     let field_ty = &fields.unnamed.first().unwrap().ty;
+                                    let tag_obj = quote! {
+                                        zod_gen::zod_object(&[(#tag_lit, zod_gen::zod_literal(#var_lit).as_str())])
+                                    };
                                     quote! {
                                         {
-                                            let lit = zod_gen::zod_literal(#var_lit);
+                                            let tag_obj = #tag_obj;
                                             let payload = <#field_ty as zod_gen::ZodSchema>::zod_schema();
-                                            zod_gen::zod_object(&[(#tag_lit, lit.as_str()), ("data", payload.as_str())])
+                                            zod_gen::zod_intersection(&tag_obj, &payload)
                                         }
                                     }
                                 } else {
-                                    panic!("#[serde(tag = \"...\")] cannot be used with tuple variants");
+                                    #[allow(clippy::useless_conversion, clippy::needless_return)]
+                                    {
+                                        return syn::Error::new_spanned(
+                                            v,
+                                            "#[serde(tag = \"...\")] cannot be used with tuple variants",
+                                        )
+                                        .to_compile_error()
+                                        .into();
+                                    }
                                 }
                             }
                             Fields::Named(fields) => {

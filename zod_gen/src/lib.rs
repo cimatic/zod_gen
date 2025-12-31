@@ -94,6 +94,10 @@ pub trait ZodSchema {
     fn zod_schema() -> String;
 }
 
+/// Marker trait for types that produce an object-like Zod schema (z.object(...)).
+/// Used for internally tagged newtype variants to properly flatten payload fields.
+pub trait ZodObjectSchema: ZodSchema {}
+
 /// Helper functions for building Zod schema strings
 pub fn zod_string() -> &'static str {
     "z.string()"
@@ -132,7 +136,10 @@ pub fn zod_union(variants: &[&str]) -> String {
 }
 
 pub fn zod_discriminated_union(tag_key: &str, variants: &[&str]) -> String {
-    format!("z.discriminatedUnion('{tag_key}', [{}])", variants.join(", "))
+    format!(
+        "z.discriminatedUnion('{tag_key}', [{}])",
+        variants.join(", ")
+    )
 }
 
 pub fn zod_tuple(items: &[&str]) -> String {
@@ -141,6 +148,10 @@ pub fn zod_tuple(items: &[&str]) -> String {
 
 pub fn zod_null() -> &'static str {
     "z.null()"
+}
+
+pub fn zod_intersection(a: &str, b: &str) -> String {
+    format!("z.intersection({a}, {b})")
 }
 
 pub fn zod_enum(variants: &[&str]) -> String {
@@ -269,6 +280,8 @@ impl ZodSchema for serde_json::Value {
         "z.any()".to_string()
     }
 }
+
+impl<T: ZodSchema> ZodObjectSchema for T {}
 
 #[cfg(test)]
 mod tests {

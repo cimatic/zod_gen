@@ -267,14 +267,22 @@ struct PayloadStruct {
 #[test]
 fn test_internal_newtype_struct() {
     let schema = InternalNewtypeStruct::zod_schema();
-    // Fields flattened into the same object (not wrapped in "data")
+    // Must use discriminatedUnion
+    assert!(
+        schema.contains("z.discriminatedUnion('type', ["),
+        "schema: {schema}"
+    );
+    // Variant literal present
     assert!(
         schema.contains("type: z.literal('Payload')"),
         "schema: {schema}"
     );
+    // Fields from struct must be present
     assert!(schema.contains("x: z.number()"), "schema: {schema}");
     // Must NOT have a "data" wrapper
     assert!(!schema.contains(r#""data""#), "schema: {schema}");
+    // Should use intersection for flattening
+    assert!(schema.contains("z.intersection("), "schema: {schema}");
 }
 
 // ============================================================================
