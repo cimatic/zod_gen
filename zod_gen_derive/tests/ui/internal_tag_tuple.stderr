@@ -1,0 +1,5 @@
+error: #[serde(tag = "...")] cannot be used with tuple variants
+ --> tests/ui/internal_tag_tuple.rs
+  |
+  |     Tuple(u32, String),
+  |     ^^^^^^^^^^^^^^^^^^

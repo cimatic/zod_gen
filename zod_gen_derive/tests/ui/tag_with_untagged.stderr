@@ -1,0 +1,11 @@
+error: enum cannot be both untagged and internally tagged
+ --> tests/ui/tag_with_untagged.rs
+  |
+  | #[serde(tag = "type", untagged)]
+  |                       ^^^^^^^^
+
+error: enum cannot be both untagged and internally tagged
+ --> tests/ui/tag_with_untagged.rs
+  |
+  | #[serde(tag = "type", untagged)]
+  |         ^^^
