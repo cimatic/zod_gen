@@ -448,6 +448,15 @@ export type Status = z.infer<typeof StatusSchema>;
 
 ## [Unreleased]
 
+### ✨ Added
+- **Serde enum representations**: support externally tagged, internally tagged, adjacently tagged, and untagged enums in the derive macro
+- **Zod helpers**: added `z.intersection(...)` to model internally tagged newtype flattening
+- **Diagnostics**: improved compile-time validation for invalid serde tagging combinations
+
+### 📚 Documentation
+- Expanded README and crate docs with enum representation behavior and examples
+- Updated derive example to showcase internally and adjacently tagged enums
+
 ### 🤖 Added
 - **GitHub Actions CI/CD**: Comprehensive automation for testing, releases, and maintenance
   - `ci.yml`: Full test suite on multiple Rust versions, formatting, clippy, docs, security audit, coverage
