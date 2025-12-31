@@ -71,9 +71,13 @@
 //!
 //! - **Derive Macro**: Automatic schema generation with `#[derive(ZodSchema)]`
 //! - **Serde Rename Support**: Full support for `#[serde(rename = "...")]` attributes
+//! - **Serde Enum Representations**: Supports externally tagged, internally tagged, adjacently tagged, and untagged enums
 //! - **Type Safety**: Generated TypeScript types match your Rust types exactly
 //! - **Generic Types**: Built-in support for `Option<T>`, `Vec<T>`, `HashMap<String, T>`
 //! - **Batch Generation**: Generate multiple schemas in a single TypeScript file
+//!
+//! Note: Internally tagged newtype variants that wrap structs are flattened via `z.intersection(...)`.
+//! Tuple variants are rejected for internally tagged enums to match Serde's rules.
 //!
 //! ## Installation
 //!
@@ -81,8 +85,8 @@
 //!
 //! ```toml
 //! [dependencies]
-//! zod_gen = "1.1.7"
-//! zod_gen_derive = "1.1.7"
+//! zod_gen = "1.2.0"
+//! zod_gen_derive = "1.2.0"
 //! serde = { version = "1.0", features = ["derive"] }
 //! ```
 

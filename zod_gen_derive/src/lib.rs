@@ -136,7 +136,14 @@ pub fn derive_zod_schema(input: TokenStream) -> TokenStream {
                     }
                 }
             }
-            _ => panic!("ZodSchema derive only supports structs with named fields"),
+            _ => {
+                return syn::Error::new(
+                    name_span,
+                    "ZodSchema derive only supports structs with named fields",
+                )
+                .to_compile_error()
+                .into();
+            }
         },
         Data::Enum(data_enum) => {
             let representation = parse_enum_serde_attrs(&input.attrs)
@@ -241,7 +248,12 @@ pub fn derive_zod_schema(input: TokenStream) -> TokenStream {
                         match &variant.fields {
                             Fields::Unnamed(fields) => {
                                 if fields.unnamed.len() != 1 {
-                                    panic!("#[serde(tag = \"...\")] cannot be used with tuple variants");
+                                    return syn::Error::new_spanned(
+                                        variant,
+                                        "#[serde(tag = \"...\")] cannot be used with tuple variants",
+                                    )
+                                    .to_compile_error()
+                                    .into();
                                 }
                             }
                             Fields::Unit => {}
@@ -431,7 +443,14 @@ pub fn derive_zod_schema(input: TokenStream) -> TokenStream {
                 }
             }
         }
-        _ => panic!("ZodSchema derive only supports structs and enums"),
+        _ => {
+            return syn::Error::new(
+                name_span,
+                "ZodSchema derive only supports structs and enums",
+            )
+            .to_compile_error()
+            .into();
+        }
     };
 
     TokenStream::from(expanded)

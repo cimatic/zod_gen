@@ -185,7 +185,7 @@ This repository contains two crates:
 
 - `#[derive(ZodSchema)]` procedural macro
 - Supports structs with named fields
-- Supports enums with unit variants
+- Supports Serde enum representations (externally tagged, internally tagged, adjacently tagged, untagged)
 - Automatic dependency resolution
 
 ## 🎯 Supported Types
@@ -206,8 +206,12 @@ This repository contains two crates:
 - Nested structs supported
 
 ### Enums
-- Unit variants → `z.union([z.literal('A'), z.literal('B')])`
+- Externally tagged (default) → `z.union([ ... ])` with literals/objects
+- Internally tagged (`#[serde(tag = "...")]`) → `z.discriminatedUnion(...)`
+- Adjacently tagged (`#[serde(tag = "...", content = "...")]`) → `z.discriminatedUnion(...)`
+- Untagged (`#[serde(untagged)]`) → `z.union([ ... ])`
 - Serde rename support → `#[serde(rename = "custom_name")]` → `z.literal('custom_name')`
+- Internally tagged newtype structs are flattened via `z.intersection(...)`
 
 ## 🎯 Serde Rename Support
 
@@ -259,6 +263,17 @@ const badRole: UserRole = 'Administrator'; // Error: Type '"Administrator"' is n
 ```
 
 This ensures perfect alignment between your Rust API and TypeScript frontend, catching serialization mismatches at compile time.
+
+## 🎯 Serde Enum Representations
+
+zod_gen mirrors Serde's JSON representations for enums:
+
+- Externally tagged (default) → `z.union([ ... ])` of literals/objects
+- Internally tagged (`#[serde(tag = "...")]`) → `z.discriminatedUnion(...)`
+- Adjacently tagged (`#[serde(tag = "...", content = "...")]`) → `z.discriminatedUnion(...)`
+- Untagged (`#[serde(untagged)]`) → `z.union([ ... ])`
+
+Internally tagged newtype variants that wrap structs are flattened via `z.intersection(...)`.
 
 ## 🔧 Advanced Usage
 
