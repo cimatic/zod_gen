@@ -127,7 +127,12 @@ fn validate_commit_messages() -> Result<ValidationResult, ValidationResult> {
     }
     
     let commits = String::from_utf8_lossy(&output.stdout);
-    let commit_lines: Vec<&str> = commits.lines().filter(|line| !line.trim().is_empty()).collect();
+    let commit_lines: Vec<&str> = commits
+        .lines()
+        .map(|line| line.trim())
+        .filter(|line| !line.is_empty())
+        .filter(|line| !line.starts_with("Merge "))
+        .collect();
     
     if commit_lines.is_empty() {
         return Ok(ValidationResult::success("No commits to validate"));

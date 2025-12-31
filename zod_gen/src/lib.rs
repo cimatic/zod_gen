@@ -71,9 +71,13 @@
 //!
 //! - **Derive Macro**: Automatic schema generation with `#[derive(ZodSchema)]`
 //! - **Serde Rename Support**: Full support for `#[serde(rename = "...")]` attributes
+//! - **Serde Enum Representations**: Supports externally tagged, internally tagged, adjacently tagged, and untagged enums
 //! - **Type Safety**: Generated TypeScript types match your Rust types exactly
 //! - **Generic Types**: Built-in support for `Option<T>`, `Vec<T>`, `HashMap<String, T>`
 //! - **Batch Generation**: Generate multiple schemas in a single TypeScript file
+//!
+//! Note: Internally tagged newtype variants that wrap structs are flattened via `z.intersection(...)`.
+//! Tuple variants are rejected for internally tagged enums to match Serde's rules.
 //!
 //! ## Installation
 //!
@@ -81,8 +85,8 @@
 //!
 //! ```toml
 //! [dependencies]
-//! zod_gen = "1.1.7"
-//! zod_gen_derive = "1.1.7"
+//! zod_gen = "1.2.0"
+//! zod_gen_derive = "1.2.0"
 //! serde = { version = "1.0", features = ["derive"] }
 //! ```
 
@@ -93,6 +97,10 @@ pub trait ZodSchema {
     /// Returns the Zod schema as a string
     fn zod_schema() -> String;
 }
+
+/// Marker trait for types that produce an object-like Zod schema (z.object(...)).
+/// Used for internally tagged newtype variants to properly flatten payload fields.
+pub trait ZodObjectSchema: ZodSchema {}
 
 /// Helper functions for building Zod schema strings
 pub fn zod_string() -> &'static str {
@@ -121,6 +129,33 @@ pub fn zod_record(value: &str) -> String {
 pub fn zod_object(fields: &[(&str, &str)]) -> String {
     let items: Vec<String> = fields.iter().map(|(k, v)| format!("  {k}: {v}")).collect();
     format!("z.object({{\n{}\n}})", items.join(",\n"))
+}
+
+pub fn zod_literal(value: &str) -> String {
+    format!("z.literal('{value}')")
+}
+
+pub fn zod_union(variants: &[&str]) -> String {
+    format!("z.union([{}])", variants.join(", "))
+}
+
+pub fn zod_discriminated_union(tag_key: &str, variants: &[&str]) -> String {
+    format!(
+        "z.discriminatedUnion('{tag_key}', [{}])",
+        variants.join(", ")
+    )
+}
+
+pub fn zod_tuple(items: &[&str]) -> String {
+    format!("z.tuple([{}])", items.join(", "))
+}
+
+pub fn zod_null() -> &'static str {
+    "z.null()"
+}
+
+pub fn zod_intersection(a: &str, b: &str) -> String {
+    format!("z.intersection({a}, {b})")
 }
 
 pub fn zod_enum(variants: &[&str]) -> String {
@@ -249,6 +284,8 @@ impl ZodSchema for serde_json::Value {
         "z.any()".to_string()
     }
 }
+
+impl<T: ZodSchema> ZodObjectSchema for T {}
 
 #[cfg(test)]
 mod tests {

@@ -1,0 +1,19 @@
+error: proc-macro derive panicked
+ --> tests/ui/tag_with_untagged.rs
+  |
+  | #[derive(ZodSchema, Serialize, Deserialize)]
+  |          ^^^^^^^^^
+  |
+  = help: message: Failed to parse serde enum attributes: "enum cannot be both untagged and internally tagged"
+
+error: enum cannot be both untagged and internally tagged
+ --> tests/ui/tag_with_untagged.rs
+  |
+  | #[serde(tag = "type", untagged)]
+  |                       ^^^^^^^^
+
+error: enum cannot be both untagged and internally tagged
+ --> tests/ui/tag_with_untagged.rs
+  |
+  | #[serde(tag = "type", untagged)]
+  |         ^^^

@@ -11,6 +11,7 @@ Core library for generating Zod schemas from Rust types.
 - Helper functions for building Zod expressions  
 - `ZodGenerator` for batch file generation
 - Built-in implementations for primitive types
+- Serde enum representations supported by the derive macro
 
 ## Usage
 

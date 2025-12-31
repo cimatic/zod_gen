@@ -9,7 +9,7 @@ Derive macro for `zod_gen` - automatically generate Zod schemas from Rust types.
 
 - `#[derive(ZodSchema)]` procedural macro
 - Supports structs with named fields
-- Supports enums with unit variants  
+- Supports Serde enum representations (externally tagged, internally tagged, adjacently tagged, untagged) and generates appropriate unions/discriminated unions  
 - Automatic dependency resolution
 
 ## Usage
@@ -31,5 +31,14 @@ enum Status {
     Inactive,
 }
 ```
+
+### Serde enum representations
+
+- Externally tagged (default) → `z.union([ ... ])`
+- Internally tagged (`#[serde(tag = "...")]`) → `z.discriminatedUnion(...)`
+- Adjacently tagged (`#[serde(tag = "...", content = "...")]`) → `z.discriminatedUnion(...)`
+- Untagged (`#[serde(untagged)]`) → `z.union([ ... ])`
+
+Internally tagged enums do not allow tuple variants, and internally tagged newtype variants must wrap object-like payloads.
 
 For more examples and documentation, see the [main repository](https://github.com/cimatic/zod_gen).
