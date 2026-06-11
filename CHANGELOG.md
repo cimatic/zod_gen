@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### ✨ Added
+
+#### Small Integer Type Support
+- **Added `ZodSchema` impls for `u8`, `u16`, `i8`, `i16`**: These small integer types were missing despite the README claiming "built-in support for all common Rust types". They map to `z.number()`, matching the existing impls for `i32`, `i64`, `u32`, `u64`, `f32`, `f64`. This unblocks the `#[derive(ZodSchema)]` macro on enums and structs that contain small-integer fields (e.g. byte-level protocols, packed bitfields, layer indices).
+
 ## [1.2.0] - 2025-12-05
 
 ### ✨ Added
