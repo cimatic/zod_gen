@@ -261,6 +261,30 @@ impl ZodSchema for bool {
     }
 }
 
+impl ZodSchema for u8 {
+    fn zod_schema() -> String {
+        zod_number().to_string()
+    }
+}
+
+impl ZodSchema for u16 {
+    fn zod_schema() -> String {
+        zod_number().to_string()
+    }
+}
+
+impl ZodSchema for i8 {
+    fn zod_schema() -> String {
+        zod_number().to_string()
+    }
+}
+
+impl ZodSchema for i16 {
+    fn zod_schema() -> String {
+        zod_number().to_string()
+    }
+}
+
 impl<T: ZodSchema> ZodSchema for Option<T> {
     fn zod_schema() -> String {
         zod_nullable(&T::zod_schema())
