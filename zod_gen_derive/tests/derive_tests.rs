@@ -11,9 +11,25 @@ struct TestStruct {
 
 #[derive(ZodSchema)]
 #[allow(dead_code)]
+struct TestSmallIntegerStruct {
+    byte: u8,
+    layer: u16,
+    offset: i8,
+    temperature: i16,
+}
+
+#[derive(ZodSchema)]
+#[allow(dead_code)]
 enum TestEnum {
     Foo,
     Bar,
+}
+
+#[derive(ZodSchema)]
+#[allow(dead_code)]
+enum TestSmallIntegerEnum {
+    Byte(u8),
+    Temperature(i16),
 }
 
 #[test]
@@ -24,10 +40,32 @@ fn test_struct_schema() {
 }
 
 #[test]
+fn test_small_integer_struct_schema() {
+    let schema = TestSmallIntegerStruct::zod_schema();
+    assert!(schema.contains("byte: z.number()"), "schema: {schema}");
+    assert!(schema.contains("layer: z.number()"), "schema: {schema}");
+    assert!(schema.contains("offset: z.number()"), "schema: {schema}");
+    assert!(
+        schema.contains("temperature: z.number()"),
+        "schema: {schema}"
+    );
+}
+
+#[test]
 fn test_enum_schema() {
     let schema = TestEnum::zod_schema();
     assert!(schema.contains("z.literal('Foo')"));
     assert!(schema.contains("z.literal('Bar')"));
+}
+
+#[test]
+fn test_small_integer_enum_schema() {
+    let schema = TestSmallIntegerEnum::zod_schema();
+    assert!(schema.contains("Byte: z.number()"), "schema: {schema}");
+    assert!(
+        schema.contains("Temperature: z.number()"),
+        "schema: {schema}"
+    );
 }
 
 #[derive(ZodSchema, Serialize)]

@@ -261,6 +261,30 @@ impl ZodSchema for bool {
     }
 }
 
+impl ZodSchema for u8 {
+    fn zod_schema() -> String {
+        zod_number().to_string()
+    }
+}
+
+impl ZodSchema for u16 {
+    fn zod_schema() -> String {
+        zod_number().to_string()
+    }
+}
+
+impl ZodSchema for i8 {
+    fn zod_schema() -> String {
+        zod_number().to_string()
+    }
+}
+
+impl ZodSchema for i16 {
+    fn zod_schema() -> String {
+        zod_number().to_string()
+    }
+}
+
 impl<T: ZodSchema> ZodSchema for Option<T> {
     fn zod_schema() -> String {
         zod_nullable(&T::zod_schema())
@@ -297,6 +321,17 @@ mod tests {
         assert_eq!(zod_number(), "z.number()");
         assert_eq!(zod_boolean(), "z.boolean()");
         assert_eq!(zod_bigint(), "z.bigint()");
+
+        assert_eq!(i8::zod_schema(), "z.number()");
+        assert_eq!(i16::zod_schema(), "z.number()");
+        assert_eq!(i32::zod_schema(), "z.number()");
+        assert_eq!(i64::zod_schema(), "z.number()");
+        assert_eq!(u8::zod_schema(), "z.number()");
+        assert_eq!(u16::zod_schema(), "z.number()");
+        assert_eq!(u32::zod_schema(), "z.number()");
+        assert_eq!(u64::zod_schema(), "z.number()");
+        assert_eq!(f32::zod_schema(), "z.number()");
+        assert_eq!(f64::zod_schema(), "z.number()");
     }
 
     #[derive(Debug)]
