@@ -321,6 +321,17 @@ mod tests {
         assert_eq!(zod_number(), "z.number()");
         assert_eq!(zod_boolean(), "z.boolean()");
         assert_eq!(zod_bigint(), "z.bigint()");
+
+        assert_eq!(i8::zod_schema(), "z.number()");
+        assert_eq!(i16::zod_schema(), "z.number()");
+        assert_eq!(i32::zod_schema(), "z.number()");
+        assert_eq!(i64::zod_schema(), "z.number()");
+        assert_eq!(u8::zod_schema(), "z.number()");
+        assert_eq!(u16::zod_schema(), "z.number()");
+        assert_eq!(u32::zod_schema(), "z.number()");
+        assert_eq!(u64::zod_schema(), "z.number()");
+        assert_eq!(f32::zod_schema(), "z.number()");
+        assert_eq!(f64::zod_schema(), "z.number()");
     }
 
     #[derive(Debug)]
