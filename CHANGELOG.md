@@ -7,11 +7,82 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-06-30
+
 ### ✨ Added
 
 #### Small Integer Type Support
 - **Added `ZodSchema` impls for `u8`, `u16`, `i8`, `i16`**: These small integer types were missing despite the README claiming "built-in support for all common Rust types". They map to `z.number()`, matching the existing impls for `i32`, `i64`, `u32`, `u64`, `f32`, `f64`. This unblocks the `#[derive(ZodSchema)]` macro on enums and structs that contain small-integer fields (e.g. byte-level protocols, packed bitfields, layer indices).
 
+### ✅ Tests
+
+- Added core numeric primitive coverage in `zod_gen/src/lib.rs`
+- Added derive integration coverage for small-integer struct and enum fields in `zod_gen_derive/tests/derive_tests.rs`
+
+## [1.3.0] - 2026-02-18
+
+### ✨ Added
+- **Serde enum representations**: support externally tagged, internally tagged, adjacently tagged, and untagged enums in the derive macro
+- **Zod helpers**: added `z.intersection(...)` to model internally tagged newtype flattening
+- **Diagnostics**: improved compile-time validation for invalid serde tagging combinations
+
+### 📚 Documentation
+- Expanded README and crate docs with enum representation behavior and examples
+- Updated derive example to showcase internally and adjacently tagged enums
+
+### 🤖 Added
+- **GitHub Actions CI/CD**: Comprehensive automation for testing, releases, and maintenance
+  - `ci.yml`: Full test suite on multiple Rust versions, formatting, clippy, docs, security audit, coverage
+  - `release.yml`: Automated publishing to crates.io when tags are pushed
+  - `pr.yml`: PR validation with breaking change detection, commit message validation, CHANGELOG checks
+  - `dependencies.yml`: Weekly dependency updates and security audits
+  - `docs.yml`: Automatic documentation deployment to GitHub Pages
+
+### 🔧 Infrastructure
+- **Automated Testing**: Tests run on stable, beta, and nightly Rust
+- **Code Quality**: Automated formatting, clippy lints, and documentation checks
+- **Security**: Weekly security audits with automatic issue creation
+- **Release Automation**: Tag-triggered releases with automatic crates.io publishing
+- **Documentation**: Auto-deployed docs at GitHub Pages
+
+---
+
+## Release Process
+
+### Automated Release (Recommended)
+
+1. **Update Version**: Bump version in `Cargo.toml` workspace
+2. **Update CHANGELOG**: Document all changes in this file
+3. **Update README**: Update version numbers in installation instructions
+4. **Commit**: `git add . && git commit -m "Release vX.Y.Z"`
+5. **Tag**: `git tag vX.Y.Z`
+6. **Push**: `git push origin main --tags`
+7. **Automated**: GitHub Actions will automatically:
+   - Run full test suite
+   - Publish to crates.io
+   - Create GitHub release with changelog
+
+### Manual Release (Fallback)
+
+To release a new version manually:
+
+1. **Update Version**: Bump version in `Cargo.toml` workspace
+2. **Update CHANGELOG**: Document all changes in this file
+3. **Update README**: Update version numbers in installation instructions
+4. **Test**: Run `cargo test` to ensure all tests pass
+5. **Commit**: `git add . && git commit -m "Release vX.Y.Z"`
+6. **Tag**: `git tag vX.Y.Z`
+7. **Push**: `git push origin main --tags`
+8. **Publish**: `cargo publish -p zod_gen_derive && cargo publish -p zod_gen`
+
+### Version Guidelines
+
+- **Major (X.0.0)**: Breaking API changes
+- **Minor (X.Y.0)**: New features, backward compatible
+- **Patch (X.Y.Z)**: Bug fixes, backward compatible
+
+[1.1.0]: https://github.com/cimatic/zod_gen/releases/tag/v1.1.0
+[1.0.0]: https://github.com/cimatic/zod_gen/releases/tag/v1.0.0
 ## [1.2.0] - 2025-12-05
 
 ### ✨ Added
@@ -452,70 +523,3 @@ export type Status = z.infer<typeof StatusSchema>;
 #### Technical Details
 - Updated dependencies workflow to use correct cargo-edit syntax
 - No API changes, only CI/CD process improvement and documentation additions
-
-## [Unreleased]
-
-## [1.3.0] - 2026-02-18
-
-### ✨ Added
-- **Serde enum representations**: support externally tagged, internally tagged, adjacently tagged, and untagged enums in the derive macro
-- **Zod helpers**: added `z.intersection(...)` to model internally tagged newtype flattening
-- **Diagnostics**: improved compile-time validation for invalid serde tagging combinations
-
-### 📚 Documentation
-- Expanded README and crate docs with enum representation behavior and examples
-- Updated derive example to showcase internally and adjacently tagged enums
-
-### 🤖 Added
-- **GitHub Actions CI/CD**: Comprehensive automation for testing, releases, and maintenance
-  - `ci.yml`: Full test suite on multiple Rust versions, formatting, clippy, docs, security audit, coverage
-  - `release.yml`: Automated publishing to crates.io when tags are pushed
-  - `pr.yml`: PR validation with breaking change detection, commit message validation, CHANGELOG checks
-  - `dependencies.yml`: Weekly dependency updates and security audits
-  - `docs.yml`: Automatic documentation deployment to GitHub Pages
-
-### 🔧 Infrastructure
-- **Automated Testing**: Tests run on stable, beta, and nightly Rust
-- **Code Quality**: Automated formatting, clippy lints, and documentation checks
-- **Security**: Weekly security audits with automatic issue creation
-- **Release Automation**: Tag-triggered releases with automatic crates.io publishing
-- **Documentation**: Auto-deployed docs at GitHub Pages
-
----
-
-## Release Process
-
-### Automated Release (Recommended)
-
-1. **Update Version**: Bump version in `Cargo.toml` workspace
-2. **Update CHANGELOG**: Document all changes in this file
-3. **Update README**: Update version numbers in installation instructions
-4. **Commit**: `git add . && git commit -m "Release vX.Y.Z"`
-5. **Tag**: `git tag vX.Y.Z`
-6. **Push**: `git push origin main --tags`
-7. **Automated**: GitHub Actions will automatically:
-   - Run full test suite
-   - Publish to crates.io
-   - Create GitHub release with changelog
-
-### Manual Release (Fallback)
-
-To release a new version manually:
-
-1. **Update Version**: Bump version in `Cargo.toml` workspace
-2. **Update CHANGELOG**: Document all changes in this file
-3. **Update README**: Update version numbers in installation instructions
-4. **Test**: Run `cargo test` to ensure all tests pass
-5. **Commit**: `git add . && git commit -m "Release vX.Y.Z"`
-6. **Tag**: `git tag vX.Y.Z`
-7. **Push**: `git push origin main --tags`
-8. **Publish**: `cargo publish -p zod_gen_derive && cargo publish -p zod_gen`
-
-### Version Guidelines
-
-- **Major (X.0.0)**: Breaking API changes
-- **Minor (X.Y.0)**: New features, backward compatible
-- **Patch (X.Y.Z)**: Bug fixes, backward compatible
-
-[1.1.0]: https://github.com/cimatic/zod_gen/releases/tag/v1.1.0
-[1.0.0]: https://github.com/cimatic/zod_gen/releases/tag/v1.0.0
