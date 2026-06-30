@@ -8,6 +8,12 @@
 
 Generate [Zod](https://github.com/colinhacks/zod) schemas and TypeScript types from Rust types with zero runtime overhead and full type safety.
 
+## Why zod_gen?
+
+We built `zod_gen` to solve a specific gap in Rust→TypeScript sharing: many projects need more than generated TypeScript declarations. They also need runtime validation for untrusted JSON coming from APIs, forms, queues, and other boundaries.
+
+`zod_gen` keeps Rust as the source of truth and generates [Zod](https://github.com/colinhacks/zod) schemas that can be used directly in TypeScript. That gives you `.parse()` / `.safeParse()` for runtime validation and `z.infer` for static typing from the same generated output.
+
 ## 🚀 Features
 
 - **Zero-cost abstractions** - No runtime overhead, pure compile-time code generation
@@ -434,7 +440,7 @@ This project uses GitHub Actions for comprehensive automation:
   - GitHub release creation with changelog
   - Full validation before publishing
 
-- **🔒 Security & Maintenance**: 
+- **🔒 Security & Maintenance**:
   - Weekly dependency updates via automated PRs
   - Security vulnerability scanning
   - Breaking change detection on PRs
@@ -444,7 +450,7 @@ This project uses GitHub Actions for comprehensive automation:
 ### 📋 PR Guidelines
 
 - Follow [Conventional Commits](https://conventionalcommits.org/) format
-- Update `CHANGELOG.md` for non-documentation changes  
+- Update `CHANGELOG.md` for non-documentation changes
 - Ensure all tests pass and examples work
 - Code must be formatted (`cargo fmt`) and pass clippy lints
 
@@ -476,9 +482,34 @@ cargo run --example derive_example
 cargo run --example generator_example
 ```
 
-## 📄 License
+## zod_gen vs ts-rs
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+[`ts-rs`](https://github.com/Aleph-Alpha/ts-rs) is an excellent Rust→TypeScript generator, especially if you only need TypeScript type declarations.
+
+| | `zod_gen` | `ts-rs` |
+| --- | --- | --- |
+| Primary output | Zod schemas + `z.infer` TypeScript types | TypeScript type declarations |
+| Runtime validation | Yes, via generated Zod schemas | No, focuses on TypeScript bindings |
+| Frontend dependency | Zod | None required by generated types |
+| Typical workflow | Generate schemas once, then validate and infer from the same file | Export TS bindings for compile-time sharing |
+| Best fit | API contracts, form validation, parsing untrusted JSON, Zod-first codebases | Projects that only need shared TS types |
+
+### When to choose zod_gen
+
+Consider `zod_gen` over `ts-rs` when you:
+
+- already use Zod in your frontend or TypeScript services
+- want runtime validation and static typing from one generated artifact
+- want generated schemas ready for `.parse()` / `.safeParse()` at API boundaries
+- prefer a single generated file containing named schemas and inferred types
+
+### When ts-rs may be enough
+
+Consider `ts-rs` when you:
+
+- only need TypeScript type declarations
+- do not want a Zod dependency in generated output
+- already validate payloads some other way and just want Rust/TypeScript type sharing
 
 ## 🙏 Acknowledgments
 
@@ -489,3 +520,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 **Built with ❤️ by the [Cimatic](https://cimatic.io) team**
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
